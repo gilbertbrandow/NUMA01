@@ -1,5 +1,5 @@
 from typing import Tuple, Callable
-from numpy import *
+import numpy as np
 import sys
 
 
@@ -10,7 +10,7 @@ def main() -> None:
     print(f'Task 10a: {task_10(20, 6)}')
     print(f'Task 10b: {task_10(125, 11)}')
 
-    if (task_12(x=2.3)):
+    if task_12(x=2.3):
         print('The expression is zero when x = 2.3')
     else:
         print('The expression is not zero when x = 2.3')
@@ -19,7 +19,7 @@ def main() -> None:
 
     """
     Task 14: 
-    The snippet calculates and prints the sum of the first 500 integers
+    The snippet calculates and prints the sum of the first 500 integers.
     
            499
     sum = ∑ i
@@ -42,10 +42,10 @@ def task_8() -> None:
 
 
 def task_9(x: int, y: int, z: int) -> float:
-    sum: int = x + y
-    product: int = sum * z
-    difference: int = product - 10
-    fraction: float = difference / 2
+    sum_: int = np.add(x, y)
+    product: int = np.multiply(sum_, z)
+    difference: int = np.subtract(product, 10)
+    fraction: float = np.divide(difference, 2)
     return fraction
 
 
@@ -56,7 +56,7 @@ def task_10(numerator: int, denominator: int) -> Tuple[int, int]:
 
 
 def task_11(x: float) -> float:
-    """Native function for absolute value: abs()"""
+    """Native function for absolute value: abs() or numpy: np.abs()"""
     if x < 0:
         return -x
     return x
@@ -75,7 +75,7 @@ def task_13(x: float, k: int) -> float:
 
 def task_16() -> float:
     def f(x: float) -> float:
-        return 4 * x**3 - x + 2
+        return 4 * np.power(x, 3) - x + 2
 
     return bisection_method(function=f, lower_bound=-3, upper_bound=3)
 
@@ -83,8 +83,8 @@ def task_16() -> float:
 def bisection_method(function: Callable[[float], float], lower_bound: float, upper_bound: float, tolerance: float = 1e-8) -> float:
     midpoint: float = (lower_bound + upper_bound) / 2
     f_midpoint: float = function(midpoint)
-    
-    while abs(f_midpoint) >= tolerance:
+
+    while np.abs(f_midpoint) >= tolerance:
         midpoint = (lower_bound + upper_bound) / 2
         f_midpoint = function(midpoint)
 
