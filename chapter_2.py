@@ -15,6 +15,8 @@ def main() -> None:
     print(exercise_3(20))
     exercise_4()
     print(implication(True, True))
+    test_half_adder()
+    test_full_adder()
 
 
 def exercise_1() -> bool:
@@ -66,6 +68,35 @@ def exercise_4(u: int = 1, uold: float = 10.0) -> None:
 
 def implication(A: bool, B: bool) -> bool:
     return not A or (A and B)
+
+
+def half_adder(A: int, B: int) -> tuple:
+    sum = A ^ B
+    carry = A & B
+    return sum, carry
+
+
+def test_half_adder():
+    for A in [0, 1]:
+        for B in [0, 1]:
+            sum_result, carry_result = half_adder(A, B)
+            print(f"""Half adder for A={A}, B={B}:\
+Sum={sum_result}, Carry={carry_result}""")
+
+
+def full_adder(A: int, B: int, Cin: int):
+    sum = A ^ B ^ Cin
+    carry_out = (A & B) | (B & Cin) | (A & Cin)
+    return sum, carry_out
+
+
+def test_full_adder():
+    for A in [0, 1]:
+        for B in [0, 1]:
+            for C in [0, 1]:
+                sum_result, carry_result = full_adder(A, B, C)
+                print(f"""Full adder for A={A}, B={B}, C={C}:\
+Sum={sum_result}, Carry={carry_result}""")
 
 
 if __name__ == "__main__":
