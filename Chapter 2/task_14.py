@@ -7,7 +7,7 @@ a: float = -0.5
 
 
 def main(n: range, h: float, a: float) -> None:
-    u: list = [np.e**0, np.e**(a*h), np.e**(2*a*h)]
+    u: list = [np.exp(0), np.exp(a*h), np.exp(2*a*h)]
 
     for index in n:
         u.append(calculate_by_index(index=index, u=u, h=h, a=a))
@@ -17,8 +17,8 @@ def main(n: range, h: float, a: float) -> None:
     # Plot the approximation u_n versus td
     figure(figsize=(10, 5))
     plot(td, u, label='Approximation (Recursion Formula)', color='blue')
-    xlabel('x (time steps)')
-    ylabel('u values')
+    xlabel('x')
+    ylabel('approximation')
     title('Plot of Approximation (td vs u)')
     legend()
     grid(True)
@@ -31,20 +31,20 @@ def main(n: range, h: float, a: float) -> None:
     figure(figsize=(10, 5))
     plot(td, u, label='Approximation (Recursion Formula)', color='blue')
     plot(td, exact_values, label='Exact Solution (e^(a * tn))', color='green', linestyle='--')
-    xlabel('x (time steps)')
-    ylabel('u values')
+    xlabel('x')
+    ylabel('y')
     title('Approximation vs Exact Solution')
     legend()
     grid(True)
     show()
 
     # Calculate the difference |e^(a*tn) - u_n|
-    differences = [abs(exact - approx) for exact, approx in zip(exact_values, u)]
+    differences = [np.abs(exact - approx) for exact, approx in zip(exact_values, u)]
 
     # Plot the differences |e^(a*tn) - u_n|
     figure(figsize=(10, 5))
     plot(td, differences, label='|Exact Solution - Approximation|', color='red')
-    xlabel('x (time steps)')
+    xlabel('x')
     ylabel('Absolute Difference')
     title('Plot of Absolute Differences |e^(a*tn) - u_n|')
     legend()
