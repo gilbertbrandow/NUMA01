@@ -30,7 +30,8 @@ def main(n: range, h: float, a: float) -> None:
     # Approximation and Exact solution
     figure(figsize=(10, 5))
     plot(td, u, label='Approximation (Recursion Formula)', color='blue')
-    plot(td, exact_values, label='Exact Solution (e^(a * tn))', color='green', linestyle='--')
+    plot(td, exact_values, label='Exact Solution (e^(a * tn))',
+         color='green', linestyle='--')
     xlabel('x')
     ylabel('y')
     title('Approximation vs Exact Solution')
@@ -39,7 +40,8 @@ def main(n: range, h: float, a: float) -> None:
     show()
 
     # Calculate the difference |e^(a*tn) - u_n|
-    differences = [np.abs(exact - approx) for exact, approx in zip(exact_values, u)]
+    differences = [np.abs(exact - approx)
+                   for exact, approx in zip(exact_values, u)]
 
     # Plot the differences |e^(a*tn) - u_n|
     figure(figsize=(10, 5))
@@ -50,7 +52,7 @@ def main(n: range, h: float, a: float) -> None:
     legend()
     grid(True)
     show()
-    
+
     return
 
 
