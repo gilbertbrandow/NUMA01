@@ -4,10 +4,23 @@ from matplotlib.pyplot import *
 
 
 def main() -> None:
-    def f(x):
-        return x**3 - x - 2
     
-    print(bisection_method(f, 1, 2))
+    print(bisection_method(lambda x: x**3 - x - 2, 1, 2))
+    print(bisection_method(lambda x: np.arctan(x), -1, 2))
+    
+    f = lambda x: 3*x**2 - 5
+    
+    try:
+        root_1 = bisection_method(f, -0.5, 0.6)
+        print(f"Root in the interval [-0.5, 0.6]: {root_1}")
+    except ValueError as e:
+        print(e)
+
+    try:
+        root_2 = bisection_method(f, -1.5, -0.4)
+        print(f"Root in the interval [-1.5, -0.4]: {root_2}")
+    except ValueError as e:
+        print(e)
     
     return
 
@@ -69,7 +82,7 @@ def bisection_method(function: Callable[[float], float], a: float, b: float, tol
         float: _description_
     """
     if not function(a) * function(b) < 0: 
-        raise ValueError("There is no sign change between the given points")
+        raise ValueError(f'There is no sign change between the given points {a} and {b}')
     
     if np.abs(a - b) < tolerance: 
         return (a + b) / 2
