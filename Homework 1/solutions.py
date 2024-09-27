@@ -26,11 +26,14 @@ def task_2() -> None:
     fig.set_figheight(10)
 
     for i in range(4):
-        axs[0, i].plot(xv, [np.log(x) for x in xv])
-        axs[0, i].plot(xv, [approx_ln(x, nv[i]) for x in xv])
-        axs[0, i].set_title(f'ln and approx_ln, n={nv[i]}')
-        axs[1, i].plot(xv, [abs(approx_ln(x, nv[i])-np.log(x)) for x in xv])
-        axs[1, i].set_title(f'error, n={nv[i]}')
+        axs[0, i].plot(xv, [np.log(x) for x in xv], label='ln(x)')
+        axs[0, i].plot(xv, [approx_ln(x, nv[i]) for x in xv], label='approx_ln(x)')
+        axs[0, i].set_title(f'n={nv[i]}')
+        axs[0, i].legend()
+
+        axs[1, i].plot(xv, [abs(approx_ln(x, nv[i])-np.log(x)) for x in xv], label='error ln(x) and approx_ln(x)')
+        axs[1, i].set_title(f'n={nv[i]}')
+        axs[1, i].legend()
 
 
 def task_3():
