@@ -44,6 +44,9 @@ def task_3():
 
 
 def fast_approx_ln(x: float, n: int) -> float:
+    if x < 0:
+        raise Exception("x must be greater than 0.")
+    
     d: List[List[float]] = [[0.0 for _ in range(n + 1)] for _ in range(n + 1)]
     a: float = (1 + x) / 2
     g: float = np.sqrt(x)
@@ -59,6 +62,7 @@ def fast_approx_ln(x: float, n: int) -> float:
             d[k][i] = (d[k - 1][i] - 4 ** (-k) * d[k - 1][i - 1]) / (1 - 4 ** (-k))
     
     return (x - 1) / d[n][n]
+
 
 def task_5():
     pp.figure()
