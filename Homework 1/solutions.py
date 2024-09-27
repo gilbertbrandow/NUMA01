@@ -62,9 +62,9 @@ def fast_approx_ln(x: float, n: int) -> float:
 
 def task_5():
     pp.figure()
-    xv = np.linspace(0.1, 20, 50)
+    xv = np.linspace(0.1, 20, 200)
     for n in range(2, 7):
-        pp.plot(xv, [abs(fast_approx_ln(x, n) - np.log(x)) for x in xv], label=f'iteration {n}')
+        pp.scatter(xv, [abs(fast_approx_ln(x, n) - np.log(x)) for x in xv], label=f'iteration {n}')
     
     pp.xlabel("x")
     pp.ylabel("error")
