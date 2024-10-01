@@ -10,10 +10,10 @@ def approx_ln(x: float, n: int) -> float:
     :param x: The number for which to approximate the natural logarithm. Must be positive.
     :param n: The number of iterations to refine the approximation.
     :return: The approximation of ln(x).
-    :raises Exception: if x is not greater than 0.
+    :raises ValueError: if x is not greater than 0.
     """
     if x < 0:
-        raise Exception("x must be greater than 0.")
+        raise ValueError("x must be greater than 0.")
 
     a: float = (1+x)/2
     g: float = np.sqrt(x)
@@ -74,10 +74,10 @@ def fast_approx_ln(x: float, n: int) -> float:
     :param x: The number for which to approximate the natural logarithm. Must be positive.
     :param n: The number of iterations to refine the approximation.
     :return: The approximation of ln(x).
-    :raises Exception: if x is not greater than 0.
+    :raises ValueError: if x is not greater than 0.
     """
     if x < 0:
-        raise Exception("x must be greater than 0.")
+        raise ValueError("x must be greater than 0.")
     
     d: List[List[float]] = [[0.0 for _ in range(n + 1)] for _ in range(n + 1)]
     a: float = (1 + x) / 2
