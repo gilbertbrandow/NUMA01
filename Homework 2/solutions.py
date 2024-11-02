@@ -28,12 +28,19 @@ class Interval:
     def __radd__(self, addend: Union['Interval', float, int]) -> 'Interval':
         return self.__add__(addend)
     
-    def __sub__(
-        self,
-        subtrahend: 'Interval'
-    ) -> 'Interval':
-        return Interval(self.a - subtrahend.b, self.b - subtrahend.a)
+    def __sub__(self, subtrahend: Union['Interval', float, int]) -> 'Interval':
+        if isinstance(subtrahend, (float, int)):
+            return Interval(self.a - subtrahend, self.b - subtrahend)
+        elif not isinstance (subtrahend, Interval): 
+            return NotImplemented
 
+        return Interval(self.a - subtrahend.b, self.b - subtrahend.a)
+    
+    def __rsub__(self, other: Union[float, int]) -> 'Interval':
+        if isinstance(other, (float, int)):
+            return Interval(other - self.b, other - self.a)
+        return NotImplemented
+    
     def __mul__(
         self,
         factor: 'Interval'
@@ -55,7 +62,6 @@ class Interval:
             self,
             denominator: 'Interval'
     ) -> 'Interval':
-        
         if denominator.a <= 0 <= denominator.b:
             raise ValueError(f"Cannot divide by an interval that spans zero. Denominator: {denominator}")
 
