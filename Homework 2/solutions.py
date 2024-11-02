@@ -41,7 +41,7 @@ class Interval:
             return Interval(subtrahend - self.b, subtrahend - self.a)
         return NotImplemented
     
-    def __mul__(self, factor: Union[float, int]) -> 'Interval':
+    def __mul__(self, factor: Union[float, int, 'Interval']) -> 'Interval':
         if isinstance(factor, (float, int)): 
             simple_products: tuple = (
                 self.a * factor,
@@ -52,34 +52,39 @@ class Interval:
         elif not isinstance(factor, Interval): 
             return NotImplemented
         
-        products: list = [
+        products: tuple = (
             self.a * factor.a,
             self.a * factor.b,
             self.b * factor.a,
             self.b * factor.b
-        ]
+        )
 
         return Interval(
             min(products),
             max(products)
         )
 
-    def __rmul__(self, factor: Union[float, int]) -> 'Interval':
+    def __rmul__(self, factor: Union[float, int, 'Interval']) -> 'Interval':
         return self.__mul__(factor)
     
-    def __truediv__(
-            self,
-            denominator: 'Interval'
-    ) -> 'Interval':
+    def __truediv__(self, denominator: Union[float, int, 'Interval']) -> 'Interval':
+        if isinstance(denominator, (float, int)): 
+            if denominator == 0:
+                raise ZeroDivisionError("Cannot divide by 0")
+            
+            return Interval(self.a / denominator, self.b / denominator)
+        elif not isinstance(denominator, Interval): 
+            return NotImplemented
+        
         if denominator.a <= 0 <= denominator.b:
-            raise ValueError(f"Cannot divide by an interval that spans zero. Denominator: {denominator}")
+            raise ZeroDivisionError(f"Cannot divide by an interval that spans zero. Denominator: {denominator}")
 
-        quotients: list = [
+        quotients: tuple = (
             self.a / denominator.a,
             self.a / denominator.b,
             self.b / denominator.a,
             self.b / denominator.b
-        ]
+        )
 
         result: Interval = Interval(min(quotients), max(quotients))
         
@@ -88,10 +93,24 @@ class Interval:
 
         return result
     
-    def __contains__ (
-        self, 
-        x: float
-    ) -> bool: 
+    def __rtruediv__(self, other: Union[float, int]) -> 'Interval':
+        if isinstance(other, (float, int)):
+            
+            if self.a <= 0 <= self.b:
+                raise ZeroDivisionError(f"Cannot divide by an interval that spans zero. Interval {self}")
+            
+            quotients: tuple = (
+                other / self.a,
+                other / self.b
+            )
+            
+            return Interval(min(quotients), max(quotients))
+        return NotImplemented
+    
+    def __neg__(self) -> 'Interval':
+        return Interval(-self.b, -self.a)
+                        
+    def __contains__ (self, x: Union[int, float]) -> bool: 
         return self.a <= x <= self.b
 
 def task_4(I1: Interval, I2: Interval) -> None:
