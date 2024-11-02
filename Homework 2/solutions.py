@@ -1,13 +1,17 @@
 import matplotlib.pyplot as pp
 import numpy as np
+from typing import Optional
 
 
 class Interval:
     def __init__(
         self,
         a: float,
-        b: float
+        b: Optional[float] = None
     ) -> None:
+        if b is None:
+            b = a
+        
         self.a = min(a, b)
         self.b = max(a, b)
 
@@ -58,15 +62,20 @@ class Interval:
             self.b / denominator.b
         ]
 
-        return Interval(min(quotients), max(quotients))
+        result: Interval = Interval(min(quotients), max(quotients))
+        
+        if result.b - result.a > 1e10:  
+            raise OverflowError("Resulting interval is excessively large, indicating an approach toward infinity.")
 
-
-def main() -> None:
-    I: Interval = Interval(-1, 2)
-    I1: Interval = Interval(1, 4)
-    I2: Interval = Interval(-2, -1)
+        return result
     
-    # Task 3: The four basic arithmetic operations
+    def __contains__ (
+        self, 
+        x: float
+    ) -> bool: 
+        return self.a <= x <= self.b
+
+def task_4(I1: Interval, I2: Interval) -> None:
     sum: Interval = I1 + I2
     diff: Interval = I1 - I2
     product: Interval = I1 * I2
@@ -77,6 +86,17 @@ def main() -> None:
     print(product)
     print(quotient)
 
+def main() -> None:
+    
+    I: Interval = Interval(-1, 2)
+    I1: Interval = Interval(1, 4)
+    I2: Interval = Interval(-2, -1)
+    I3: Interval = Interval(1)
+    
+    print(I3)
+    
+    if -1 in I2: 
+        print("Hello world")
 
 if __name__ == "__main__":
     main()
