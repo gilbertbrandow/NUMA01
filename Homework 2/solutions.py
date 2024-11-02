@@ -1,6 +1,6 @@
 import matplotlib.pyplot as pp
 import numpy as np
-from typing import Optional
+from typing import Optional, Union
 
 
 class Interval:
@@ -18,12 +18,16 @@ class Interval:
     def __repr__(self) -> str:
         return f"[{self.a}, {self.b}]"
 
-    def __add__(
-        self,
-        addend: 'Interval'
-    ) -> 'Interval':
-        return Interval(self.a + addend.a, self.b + addend.b)
-
+    def __add__(self, addend: Union['Interval', float, int]) -> 'Interval':
+        if isinstance(addend, Interval):
+            return Interval(self.a + addend.a, self.b + addend.b)
+        elif isinstance(addend, (float, int)):
+            return Interval(self.a + addend, self.b + addend)
+        return NotImplemented
+    
+    def __radd__(self, addend: Union['Interval', float, int]) -> 'Interval':
+        return self.__add__(addend)
+    
     def __sub__(
         self,
         subtrahend: 'Interval'
@@ -93,7 +97,7 @@ def main() -> None:
     I2: Interval = Interval(-2, -1)
     I3: Interval = Interval(1)
     
-    print(I3)
+    print(1 + I2)
     
     if -1 in I2: 
         print("Hello world")
