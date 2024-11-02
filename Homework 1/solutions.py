@@ -12,7 +12,7 @@ def approx_ln(x: float, n: int) -> float:
     :return: The approximation of ln(x).
     :raises ValueError: if x is not greater than 0.
     """
-    if x < 0:
+    if x <= 0:
         raise ValueError("x must be greater than 0.")
 
     a: float = (1+x)/2
@@ -76,7 +76,7 @@ def fast_approx_ln(x: float, n: int) -> float:
     :return: The approximation of ln(x).
     :raises ValueError: if x is not greater than 0.
     """
-    if x < 0:
+    if x <= 0:
         raise ValueError("x must be greater than 0.")
     
     d: List[List[float]] = [[0.0 for _ in range(n + 1)] for _ in range(n + 1)]
