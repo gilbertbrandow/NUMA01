@@ -16,44 +16,66 @@ class Interval:
 
     def __add__(
         self,
-        other: 'Interval'
+        addend: 'Interval'
     ) -> 'Interval':
-        return Interval(self.a + other.a, self.b + other.b)
+        return Interval(self.a + addend.a, self.b + addend.b)
 
     def __sub__(
         self,
-        other: 'Interval'
+        subtrahend: 'Interval'
     ) -> 'Interval':
-        return Interval(self.a - other.b, self.b - other.a)
+        return Interval(self.a - subtrahend.b, self.b - subtrahend.a)
 
     def __mul__(
         self,
-        other: 'Interval'
+        factor: 'Interval'
     ) -> 'Interval':
-        
+
         products: list = [
-            self.a * other.a,
-            self.a * other.b,
-            self.b * other.a,
-            self.b * other.b
+            self.a * factor.a,
+            self.a * factor.b,
+            self.b * factor.a,
+            self.b * factor.b
         ]
-        
+
         return Interval(
             min(products),
             max(products)
         )
 
+    def __truediv__(
+            self,
+            denominator: 'Interval'
+    ) -> 'Interval':
+        
+        if denominator.a <= 0 <= denominator.b:
+            raise ValueError(f"Cannot divide by an interval that spans zero. Denominator: {denominator}")
+
+        quotients: list = [
+            self.a / denominator.a,
+            self.a / denominator.b,
+            self.b / denominator.a,
+            self.b / denominator.b
+        ]
+
+        return Interval(min(quotients), max(quotients))
+
 
 def main() -> None:
-    I: Interval = Interval(1, 2)
+    I: Interval = Interval(-1, 2)
     I1: Interval = Interval(1, 4)
-    I2: Interval = Interval(-2, - 1)
+    I2: Interval = Interval(-2, -1)
+    
+    # Task 3: The four basic arithmetic operations
     sum: Interval = I1 + I2
     diff: Interval = I1 - I2
     product: Interval = I1 * I2
+    quotient: Interval = I1 / I2
+    
     print(sum)
     print(diff)
     print(product)
+    print(quotient)
 
 
 if __name__ == "__main__":
