@@ -36,16 +36,22 @@ class Interval:
 
         return Interval(self.a - subtrahend.b, self.b - subtrahend.a)
     
-    def __rsub__(self, other: Union[float, int]) -> 'Interval':
-        if isinstance(other, (float, int)):
-            return Interval(other - self.b, other - self.a)
+    def __rsub__(self, subtrahend: Union[float, int]) -> 'Interval':
+        if isinstance(subtrahend, (float, int)):
+            return Interval(subtrahend - self.b, subtrahend - self.a)
         return NotImplemented
     
-    def __mul__(
-        self,
-        factor: 'Interval'
-    ) -> 'Interval':
-
+    def __mul__(self, factor: Union[float, int]) -> 'Interval':
+        if isinstance(factor, (float, int)): 
+            simple_products: tuple = (
+                self.a * factor,
+                self.b * factor
+            )
+            
+            return Interval(min(simple_products), max(simple_products))
+        elif not isinstance(factor, Interval): 
+            return NotImplemented
+        
         products: list = [
             self.a * factor.a,
             self.a * factor.b,
@@ -58,6 +64,9 @@ class Interval:
             max(products)
         )
 
+    def __rmul__(self, factor: Union[float, int]) -> 'Interval':
+        return self.__mul__(factor)
+    
     def __truediv__(
             self,
             denominator: 'Interval'
