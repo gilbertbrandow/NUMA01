@@ -11,7 +11,7 @@ class Interval:
     ) -> None:
         if b is None:
             b = a
-        
+
         self.a = min(a, b)
         self.b = max(a, b)
 
@@ -24,34 +24,34 @@ class Interval:
         elif isinstance(addend, (float, int)):
             return Interval(self.a + addend, self.b + addend)
         return NotImplemented
-    
+
     def __radd__(self, addend: Union['Interval', float, int]) -> 'Interval':
         return self.__add__(addend)
-    
+
     def __sub__(self, subtrahend: Union['Interval', float, int]) -> 'Interval':
         if isinstance(subtrahend, (float, int)):
             return Interval(self.a - subtrahend, self.b - subtrahend)
-        elif not isinstance (subtrahend, Interval): 
+        elif not isinstance(subtrahend, Interval):
             return NotImplemented
 
         return Interval(self.a - subtrahend.b, self.b - subtrahend.a)
-    
+
     def __rsub__(self, subtrahend: Union[float, int]) -> 'Interval':
         if isinstance(subtrahend, (float, int)):
             return Interval(subtrahend - self.b, subtrahend - self.a)
         return NotImplemented
-    
+
     def __mul__(self, factor: Union[float, int, 'Interval']) -> 'Interval':
-        if isinstance(factor, (float, int)): 
+        if isinstance(factor, (float, int)):
             simple_products: tuple = (
                 self.a * factor,
                 self.b * factor
             )
-            
+
             return Interval(min(simple_products), max(simple_products))
-        elif not isinstance(factor, Interval): 
+        elif not isinstance(factor, Interval):
             return NotImplemented
-        
+
         products: tuple = (
             self.a * factor.a,
             self.a * factor.b,
@@ -66,18 +66,21 @@ class Interval:
 
     def __rmul__(self, factor: Union[float, int, 'Interval']) -> 'Interval':
         return self.__mul__(factor)
-    
+
     def __truediv__(self, denominator: Union[float, int, 'Interval']) -> 'Interval':
-        if isinstance(denominator, (float, int)): 
+        if isinstance(denominator, (float, int)):
             if denominator == 0:
                 raise ZeroDivisionError("Cannot divide by 0")
-            
+
             return Interval(self.a / denominator, self.b / denominator)
-        elif not isinstance(denominator, Interval): 
+        elif not isinstance(denominator, Interval):
             return NotImplemented
-        
+
         if denominator.a <= 0 <= denominator.b:
-            raise ZeroDivisionError(f"Cannot divide by an interval that spans zero. Denominator: {denominator}")
+            raise ZeroDivisionError(
+                f"Cannot divide by an interval that spans zero. Denominator: \
+                    {denominator}"
+            )
 
         quotients: tuple = (
             self.a / denominator.a,
@@ -87,54 +90,78 @@ class Interval:
         )
 
         result: Interval = Interval(min(quotients), max(quotients))
-        
-        if result.b - result.a > 1e10:  
-            raise OverflowError("Resulting interval is excessively large, indicating an approach toward infinity.")
+
+        if result.b - result.a > 1e10:
+            raise OverflowError(
+                "Resulting interval is excessively large, indicating an approach toward infinity."
+            )
 
         return result
-    
+
     def __rtruediv__(self, other: Union[float, int]) -> 'Interval':
         if isinstance(other, (float, int)):
-            
+
             if self.a <= 0 <= self.b:
-                raise ZeroDivisionError(f"Cannot divide by an interval that spans zero. Interval {self}")
-            
+                raise ZeroDivisionError(
+                    f"Cannot divide by an interval that spans zero. Interval \
+                        {self}"
+                )
+
             quotients: tuple = (
                 other / self.a,
                 other / self.b
             )
-            
+
             return Interval(min(quotients), max(quotients))
         return NotImplemented
-    
+
     def __neg__(self) -> 'Interval':
         return Interval(-self.b, -self.a)
-                        
-    def __contains__ (self, x: Union[int, float]) -> bool: 
+
+    def __contains__(self, x: Union[int, float]) -> bool:
         return self.a <= x <= self.b
+
+    def __pow__(self, n: int) -> 'Interval':
+        if not isinstance(n, int) or n < 1:
+            raise ValueError("Exponent must be a positive integer.")
+
+        if n % 2 == 1:
+            return Interval(self.a ** n, self.b ** n)
+        else:
+            if self.a >= 0:
+                return Interval(self.a ** n, self.b ** n)
+            elif self.b < 0:
+                return Interval(self.b ** n, self.a ** n)
+            else:
+                return Interval(0, max(self.a ** n, self.b ** n))
+
 
 def task_4(I1: Interval, I2: Interval) -> None:
     sum: Interval = I1 + I2
     diff: Interval = I1 - I2
     product: Interval = I1 * I2
     quotient: Interval = I1 / I2
-    
+
     print(sum)
     print(diff)
     print(product)
     print(quotient)
 
+
 def main() -> None:
-    
+
     I: Interval = Interval(-1, 2)
     I1: Interval = Interval(1, 4)
     I2: Interval = Interval(-2, -1)
     I3: Interval = Interval(1)
-    
+
     print(1 + I2)
-    
-    if -1 in I2: 
+
+    if -1 in I2:
         print("Hello world")
+
+    print(I1 ** 3)
+
 
 if __name__ == "__main__":
     main()
