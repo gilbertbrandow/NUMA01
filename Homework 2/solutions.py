@@ -141,6 +141,22 @@ def task_4(I1: Interval, I2: Interval) -> None:
     print(product)
     print(quotient)
 
+def task_10() -> None:    
+    x1: np.ndarray[float] = np.linspace(0., 1, 1000)
+    xu: np.ndarray[float] = x1 + 0.5
+    p: Callable[[Interval], Interval] = lambda x: 3*x**3 - 2*x**2 - 5*x - 1
+
+    iv1: list[Interval] = [Interval(l, u) for l, u in zip(x1, xu)]
+    iv2: list[Interval] = [p(I) for I in iv1]
+
+    y1: list[float] = [I.a for I in iv1]
+    yu: list[float] = [I.b for I in iv2]
+
+    pp.plot(x1, y1, label='y1')
+    pp.plot(x1, yu, label='yu')
+    
+    pp.legend()
+    pp.show()
 
 def main() -> None:
 
@@ -149,13 +165,8 @@ def main() -> None:
     I2: Interval = Interval(-2, -1)
     I3: Interval = Interval(1)
 
-    print(1 + I2)
-
-    if -1 in I2:
-        print("Hello world")
-
-    print(I1 ** 3)
-
+    #task_4()
+    task_10()
 
 if __name__ == "__main__":
     main()
