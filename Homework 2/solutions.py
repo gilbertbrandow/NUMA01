@@ -4,14 +4,8 @@ from typing import Optional, Union
 
 
 class Interval:
-    def __init__(
-        self,
-        a: float,
-        b: Optional[float] = None
-    ) -> None:
-        if b is None:
-            b = a
-
+    def __init__(self, a: float, b: Optional[float] = None) -> None:
+        b = b or a
         self.a = min(a, b)
         self.b = max(a, b)
 
@@ -99,21 +93,21 @@ class Interval:
         return result
 
     def __rtruediv__(self, other: Union[float, int]) -> 'Interval':
-        if isinstance(other, (float, int)):
+        if not isinstance(other, (float, int)):
+            return NotImplemented
 
-            if self.a <= 0 <= self.b:
-                raise ZeroDivisionError(
-                    f"Cannot divide by an interval that spans zero. Interval \
-                        {self}"
-                )
-
-            quotients: tuple = (
-                other / self.a,
-                other / self.b
+        if self.a <= 0 <= self.b:
+            raise ZeroDivisionError(
+                f"Cannot divide by an interval that spans zero. Interval \
+                    {self}"
             )
 
-            return Interval(min(quotients), max(quotients))
-        return NotImplemented
+        quotients: tuple = (
+            other / self.a,
+            other / self.b
+        )
+
+        return Interval(min(quotients), max(quotients))
 
     def __neg__(self) -> 'Interval':
         return Interval(-self.b, -self.a)
