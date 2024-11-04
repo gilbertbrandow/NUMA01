@@ -1,6 +1,7 @@
 import matplotlib.pyplot as pp
 import numpy as np
-from typing import Optional, Union
+import numpy.typing as npt
+from typing import Optional, Union, Callable
 
 
 class Interval:
@@ -142,8 +143,9 @@ def task_4(I1: Interval, I2: Interval) -> None:
     print(quotient)
 
 def task_10() -> None:    
-    x1: np.ndarray[float] = np.linspace(0., 1, 1000)
-    xu: np.ndarray[float] = x1 + 0.5
+    x1: npt.NDArray[np.floating] = np.linspace(0., 1, 1000)
+    xu: npt.NDArray[np.floating] = x1 + 0.5
+
     p: Callable[[Interval], Interval] = lambda x: 3*x**3 - 2*x**2 - 5*x - 1
 
     iv1: list[Interval] = [Interval(l, u) for l, u in zip(x1, xu)]
