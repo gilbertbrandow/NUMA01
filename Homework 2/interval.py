@@ -26,18 +26,54 @@ class BaseInterval(ABC, Generic[T]):
 
     def __add__(self, other: Union['BaseInterval[T]', T]) -> Self:
         if isinstance(other, BaseInterval):
-            new_a = self.a + other.a
-            new_b = self.b + other.b
+            return self._create_new_instance(self.a + other.a, self.b + other.b)
         elif isinstance(other, (float, int, np.ndarray)):
-            new_a = self.a + other
-            new_b = self.b + other
+            return self._create_new_instance( self.a + other, self.b + other)
         else:
             return NotImplemented
-        return self._create_new_instance(new_a, new_b)
 
     def __radd__(self, other: Union['BaseInterval[T]', T]) -> Self:
         return self.__add__(other)
+    
+    def __sub__(self, subtrahend: Union['Interval', float, int]) -> Self:
+        if isinstance(subtrahend, (float, int)):
+            return self._create_new_instance(self.a - subtrahend, self.b - subtrahend)
+        elif not isinstance(subtrahend, Interval):
+            return NotImplemented
 
+        return self._create_new_instance(self.a - subtrahend.b, self.b - subtrahend.a)
+
+    def __rsub__(self, subtrahend: Union[float, int]) -> Self:
+        if isinstance(subtrahend, (float, int)):
+            return self._create_new_instance(subtrahend - self.b, subtrahend - self.a)
+        return NotImplemented
+    
+    def __neg__(self) -> Self:
+        return self._create_new_instance(-self.b, -self.a)
+    
+    @abstractmethod
+    def __repr__(self):
+        pass
+    
+    @abstractmethod
+    def __mul__(self, factor: Union[float, int, Self]) -> Self:
+        pass
+    
+    @abstractmethod
+    def __rmul__(self, factor: Union[float, int, Self]) -> Self:
+        pass
+
+    @abstractmethod
+    def __truediv__(self, denominator: Union[float, int]) -> Self:
+        pass
+    
+    @abstractmethod
+    def __rtruediv__(self, denominator: Union[float, int]) -> Self:
+        pass
+    
+    @abstractmethod
+    def __pow__(self, n: int) -> Self:
+        pass
 
 class Interval(BaseInterval[float]):
     def __init__(self, a: float, b: Optional[float] = None) -> None:
@@ -58,19 +94,6 @@ class Interval(BaseInterval[float]):
 
     def __repr__(self) -> str:
         return f"[{self.a}, {self.b}]"
-
-    def __sub__(self, subtrahend: Union['Interval', float, int]) -> 'Interval':
-        if isinstance(subtrahend, (float, int)):
-            return Interval(self.a - subtrahend, self.b - subtrahend)
-        elif not isinstance(subtrahend, Interval):
-            return NotImplemented
-
-        return Interval(self.a - subtrahend.b, self.b - subtrahend.a)
-
-    def __rsub__(self, subtrahend: Union[float, int]) -> 'Interval':
-        if isinstance(subtrahend, (float, int)):
-            return Interval(subtrahend - self.b, subtrahend - self.a)
-        return NotImplemented
 
     def __mul__(self, factor: Union[float, int, 'Interval']) -> 'Interval':
         if isinstance(factor, (float, int)):
@@ -129,8 +152,8 @@ class Interval(BaseInterval[float]):
 
         return result
 
-    def __rtruediv__(self, other: Union[float, int]) -> 'Interval':
-        if not isinstance(other, (float, int)):
+    def __rtruediv__(self, denominator: Union[float, int]) -> 'Interval':
+        if not isinstance(denominator, (float, int)):
             return NotImplemented
 
         if self.a <= 0 <= self.b:
@@ -140,14 +163,11 @@ class Interval(BaseInterval[float]):
             )
 
         quotients: tuple = (
-            other / self.a,
-            other / self.b
+            denominator / self.a,
+            denominator / self.b
         )
 
         return Interval(min(quotients), max(quotients))
-
-    def __neg__(self) -> 'Interval':
-        return Interval(-self.b, -self.a)
 
     def __contains__(self, x: Union[int, float]) -> bool:
         return self.a <= x <= self.b
@@ -184,6 +204,9 @@ class VectorizedInterval(BaseInterval[npt.NDArray[np.float_]]):
     def b(self) -> npt.NDArray[np.float_]:
         return self._b
 
+    def __repr__(self) -> str:
+        return f"[{self.a}, {self.b}]"
+    
     def _create_new_instance(self, a: np.ndarray, b: np.ndarray) -> 'VectorizedInterval':
         return VectorizedInterval(a, b)
 
