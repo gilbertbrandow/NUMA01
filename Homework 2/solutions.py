@@ -153,7 +153,7 @@ def task_10(
     iv1: list[Interval] = [Interval(l, u) for l, u in zip(x1, xu)]
     iv2: list[Interval] = [p(I) for I in iv1]
 
-    y1: list[float] = [I.a for I in iv1]
+    y1: list[float] = [I.a for I in iv2]
     yu: list[float] = [I.b for I in iv2]
 
     pp.plot(x1, y1, label='y1')
