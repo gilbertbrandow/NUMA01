@@ -28,13 +28,13 @@ class BaseInterval(ABC, Generic[T]):
         if isinstance(other, BaseInterval):
             return self._create_new_instance(self.a + other.a, self.b + other.b)
         elif isinstance(other, (float, int, np.ndarray)):
-            return self._create_new_instance( self.a + other, self.b + other)
+            return self._create_new_instance(self.a + other, self.b + other)
         else:
             return NotImplemented
 
     def __radd__(self, other: Union['BaseInterval[T]', T]) -> Self:
         return self.__add__(other)
-    
+
     def __sub__(self, subtrahend: Union['Interval', float, int]) -> Self:
         if isinstance(subtrahend, (float, int)):
             return self._create_new_instance(self.a - subtrahend, self.b - subtrahend)
@@ -47,18 +47,18 @@ class BaseInterval(ABC, Generic[T]):
         if isinstance(subtrahend, (float, int)):
             return self._create_new_instance(subtrahend - self.b, subtrahend - self.a)
         return NotImplemented
-    
+
     def __neg__(self) -> Self:
         return self._create_new_instance(-self.b, -self.a)
-    
+
     @abstractmethod
     def __repr__(self):
         pass
-    
+
     @abstractmethod
     def __mul__(self, factor: Union[float, int, Self]) -> Self:
         pass
-    
+
     @abstractmethod
     def __rmul__(self, factor: Union[float, int, Self]) -> Self:
         pass
@@ -66,14 +66,15 @@ class BaseInterval(ABC, Generic[T]):
     @abstractmethod
     def __truediv__(self, denominator: Union[float, int]) -> Self:
         pass
-    
+
     @abstractmethod
     def __rtruediv__(self, denominator: Union[float, int]) -> Self:
         pass
-    
+
     @abstractmethod
     def __pow__(self, n: int) -> Self:
         pass
+
 
 class Interval(BaseInterval[float]):
     def __init__(self, a: float, b: Optional[float] = None) -> None:
@@ -206,7 +207,7 @@ class VectorizedInterval(BaseInterval[npt.NDArray[np.float_]]):
 
     def __repr__(self) -> str:
         return f"[{self.a}, {self.b}]"
-    
+
     def _create_new_instance(self, a: np.ndarray, b: np.ndarray) -> 'VectorizedInterval':
         return VectorizedInterval(a, b)
 
@@ -258,7 +259,8 @@ class VectorizedInterval(BaseInterval[npt.NDArray[np.float_]]):
 
         if np.any((self.a <= 0) & (self.b >= 0)):
             raise ZeroDivisionError(
-                f"Cannot divide by an interval that spans zero. Interval {self}"
+                f"Cannot divide by an interval that spans zero. Interval \
+                    {self}"
             )
 
         quotients = np.array([
@@ -267,7 +269,7 @@ class VectorizedInterval(BaseInterval[npt.NDArray[np.float_]]):
         ])
 
         return VectorizedInterval(np.min(quotients, axis=0), np.max(quotients, axis=0))
-    
+
     def __pow__(self, n: int) -> 'VectorizedInterval':
         if not isinstance(n, int) or n < 1:
             raise ValueError("Exponent must be a positive integer.")
