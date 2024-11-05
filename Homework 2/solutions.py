@@ -3,12 +3,19 @@ import numpy as np
 import numpy.typing as npt
 from typing import Optional, Union, Callable
 
-
-class Interval:
+class Interval():
     def __init__(self, a: float, b: Optional[float] = None) -> None:
         b = b or a
-        self.a = min(a, b)
-        self.b = max(a, b)
+        self._a = float(min(a, b)) 
+        self._b = float(max(a, b))
+
+    @property
+    def a(self) -> float:
+        return self._a
+
+    @property
+    def b(self) -> float:
+        return self._b
 
     def __repr__(self) -> str:
         return f"[{self.a}, {self.b}]"
@@ -130,6 +137,21 @@ class Interval:
             else:
                 return Interval(0, max(self.a ** n, self.b ** n))
 
+class VectorizedInterval():
+    def __init__(self, a: npt.NDArray[np.float_], b: Optional[npt.NDArray[np.float_]] = None) -> None:
+        if b is None:
+            b = a
+        self._a = np.asarray(a, dtype=np.float_)
+        self._b = np.asarray(b, dtype=np.float_)
+        self._a, self._b = np.minimum(self._a, self._b), np.maximum(self._a, self._b)
+
+    @property
+    def a(self) -> npt.NDArray[np.float_]:
+        return self._a
+
+    @property
+    def b(self) -> npt.NDArray[np.float_]:
+        return self._b
 
 def task_4(I1: Interval, I2: Interval) -> None:
     sum: Interval = I1 + I2
