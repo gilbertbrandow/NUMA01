@@ -18,12 +18,12 @@ class BaseInterval(ABC, Generic[T]):
     @abstractmethod
     def b(self) -> T:
         pass
-    
+
     @abstractmethod
     def _create_new_instance(self, a: T, b: T) -> Self:
         """Factory method to create a new instance of the subclass."""
         pass
-    
+
     def __add__(self, other: Union['BaseInterval[T]', T]) -> Self:
         if isinstance(other, BaseInterval):
             new_a = self.a + other.a
@@ -37,6 +37,7 @@ class BaseInterval(ABC, Generic[T]):
 
     def __radd__(self, other: Union['BaseInterval[T]', T]) -> Self:
         return self.__add__(other)
+
 
 class Interval(BaseInterval[float]):
     def __init__(self, a: float, b: Optional[float] = None) -> None:
@@ -54,7 +55,7 @@ class Interval(BaseInterval[float]):
 
     def _create_new_instance(self, a: float, b: float) -> 'Interval':
         return Interval(a, b)
-    
+
     def __repr__(self) -> str:
         return f"[{self.a}, {self.b}]"
 
@@ -182,6 +183,54 @@ class VectorizedInterval(BaseInterval[npt.NDArray[np.float_]]):
     @property
     def b(self) -> npt.NDArray[np.float_]:
         return self._b
-    
+
     def _create_new_instance(self, a: np.ndarray, b: np.ndarray) -> 'VectorizedInterval':
         return VectorizedInterval(a, b)
+
+    def __mul__(self, other: Union['VectorizedInterval', float, int, np.ndarray]) -> 'VectorizedInterval':
+        if isinstance(other, VectorizedInterval):
+            products = np.array([
+                self.a * other.a,
+                self.a * other.b,
+                self.b * other.a,
+                self.b * other.b
+            ])
+
+            return VectorizedInterval(np.min(products, axis=0), np.max(products, axis=0))
+        elif isinstance(other, (float, int, np.ndarray)):
+            simple_products: npt.NDArray[np.float_] = np.array(
+                [self.a * other, self.b * other])
+            return VectorizedInterval(np.min(simple_products, axis=0), np.max(simple_products, axis=0))
+        else:
+            return NotImplemented
+
+    def __truediv__(self, other: Union['VectorizedInterval', float, int, np.ndarray]) -> 'VectorizedInterval':
+        if isinstance(other, VectorizedInterval):
+            if np.any((other.a <= 0) & (other.b >= 0)):
+                raise ZeroDivisionError(
+                    "Cannot divide by an interval that spans zero.")
+
+            quotients = np.array([
+                self.a / other.a,
+                self.a / other.b,
+                self.b / other.a,
+                self.b / other.b
+            ])
+
+            return VectorizedInterval(np.min(quotients, axis=0), np.max(quotients, axis=0))
+
+        elif isinstance(other, (float, int, np.ndarray)):
+            if np.any(other == 0):
+                raise ZeroDivisionError("Cannot divide by zero.")
+            return VectorizedInterval(self.a / other, self.b / other)
+        else:
+            return NotImplemented
+
+    def __pow__(self, n: int) -> 'VectorizedInterval':
+        if not isinstance(n, int) or n < 1:
+            raise ValueError("Exponent must be a positive integer.")
+
+        if n % 2 == 1:
+            return VectorizedInterval(self.a ** n, self.b ** n)
+        else:
+            return VectorizedInterval(np.where(self.a >= 0, self.a ** n, 0), np.where(self.b >= 0, self.b ** n, np.maximum(self.a ** n, self.b ** n)))
