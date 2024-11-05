@@ -227,6 +227,9 @@ class VectorizedInterval(BaseInterval[npt.NDArray[np.float_]]):
         else:
             return NotImplemented
 
+    def __rmul__(self, other: Union['VectorizedInterval', float, int, np.ndarray]) -> 'VectorizedInterval':
+        return self.__mul__(other)
+
     def __truediv__(self, other: Union['VectorizedInterval', float, int, np.ndarray]) -> 'VectorizedInterval':
         if isinstance(other, VectorizedInterval):
             if np.any((other.a <= 0) & (other.b >= 0)):
@@ -249,6 +252,22 @@ class VectorizedInterval(BaseInterval[npt.NDArray[np.float_]]):
         else:
             return NotImplemented
 
+    def __rtruediv__(self, numerator: Union[float, int, np.ndarray]) -> 'VectorizedInterval':
+        if not isinstance(numerator, (float, int, np.ndarray)):
+            return NotImplemented
+
+        if np.any((self.a <= 0) & (self.b >= 0)):
+            raise ZeroDivisionError(
+                f"Cannot divide by an interval that spans zero. Interval {self}"
+            )
+
+        quotients = np.array([
+            numerator / self.a,
+            numerator / self.b
+        ])
+
+        return VectorizedInterval(np.min(quotients, axis=0), np.max(quotients, axis=0))
+    
     def __pow__(self, n: int) -> 'VectorizedInterval':
         if not isinstance(n, int) or n < 1:
             raise ValueError("Exponent must be a positive integer.")
