@@ -3,6 +3,7 @@ import numpy as np
 import numpy.typing as npt
 from typing import Callable
 from interval import Interval, VectorizedInterval
+import time
 
 def task_4(I1: Interval, I2: Interval) -> None:
     sum: Interval = I1 + I2
@@ -35,6 +36,25 @@ def task_10(
     pp.legend()
     pp.show()
 
+def measure_time(f: Callable) -> float:
+    t_start: float = time.time()
+    f()
+    t_end: float = time.time()
+    return t_end - t_start
+
+def task_11(
+    p: Callable[[VectorizedInterval], VectorizedInterval],
+    x1: npt.NDArray[np.floating],
+    dx: float
+) -> None:
+    xu: npt.NDArray[np.floating] = x1 + dx
+    vi: VectorizedInterval = p(VectorizedInterval(x1, xu))
+
+    pp.figure()
+    pp.plot(x1, vi.a, label='y1')
+    pp.plot(x1, vi.b, label='yu')
+    pp.legend()
+    pp.show()
 
 def main() -> None:
 
@@ -44,13 +64,25 @@ def main() -> None:
     I3: Interval = Interval(1)
 
     # task_4()
+
+    p: Callable[[BaseInterval], BaseInterval]=lambda x: 3*x**3 - 2*x**2 - 5*x - 1
     
     task_10(
-        p=lambda x: 3*x**3 - 2*x**2 - 5*x - 1,
+        p=p
+        x1=np.linspace(0., 1, 1000),
+        dx=0.5
+    )
+    
+    # 11.2
+    task_11(
+        p=p,
         x1=np.linspace(0., 1, 1000),
         dx=0.5
     )
 
+    # 11.3
+    print(measure_time(lambda: task_10(p=p, x1=linspace(0,1,5000000), dx=0.5)))
+    print(measure_time(lambda: task_11(p=p, x1=linspace(0,1,5000000), dx=0.5)))
 
 if __name__ == "__main__":
     main()
