@@ -41,7 +41,7 @@ def task_10(
     """
     y1, yu = evaluate_interval_bounds(p=p, x1=x1, dx=dx)
 
-    plt.title("Task 10")
+    plt.figure("Task 10")
     plt.plot(x1, y1, label='y1')
     plt.plot(x1, yu, label='yu')
     plt.legend()
@@ -98,8 +98,7 @@ def task_11(
     """
     vi = evaluate_vectorized_intervals(p=p, x1=x1, dx=dx)
 
-    plt.figure()
-    plt.title("Task 11")
+    plt.figure("Task 11")
     plt.plot(x1, vi.a, label='y1')
     plt.plot(x1, vi.b, label='yu')
     plt.legend()
@@ -146,6 +145,8 @@ def main() -> None:
         x1=np.linspace(0., 1, 1000),
         dx=0.5
     )
+    
+    return
 
     print(measure_time(lambda: evaluate_interval_bounds(
         p=p, x1=np.linspace(0, 1, 5000000), dx=0.5)))
