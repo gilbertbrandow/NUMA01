@@ -35,10 +35,10 @@ class BaseInterval(ABC, Generic[T]):
     def __radd__(self, other: Union['BaseInterval[T]', T]) -> Self:
         return self.__add__(other)
 
-    def __sub__(self, subtrahend: Union['Interval', float, int]) -> Self:
+    def __sub__(self, subtrahend: Union['BaseInterval', float, int]) -> Self:
         if isinstance(subtrahend, (float, int)):
             return self._create_new_instance(self.a - subtrahend, self.b - subtrahend)
-        elif not isinstance(subtrahend, Interval):
+        elif not isinstance(subtrahend, BaseInterval):
             return NotImplemented
 
         return self._create_new_instance(self.a - subtrahend.b, self.b - subtrahend.a)
