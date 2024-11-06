@@ -140,6 +140,15 @@ class Interval(BaseInterval[float]):
         return f"[{self.a}, {self.b}]"
 
     def __mul__(self, factor: Union[float, int, 'Interval']) -> 'Interval':
+        """
+        Multiplies two intervals. Implemented in the subclass because the
+        implementation is different for VectorizedInterval.
+
+        :param self: The current interval
+        :param factor: The other interval
+
+        :returns: The product of the intervals
+        """
         if isinstance(factor, (float, int)):
             simple_products: tuple = (
                 self.a * factor,
@@ -163,9 +172,21 @@ class Interval(BaseInterval[float]):
         )
 
     def __rmul__(self, factor: Union[float, int, 'Interval']) -> 'Interval':
+        """
+        Multiplies two intervals, see __mul__.
+        """
         return self.__mul__(factor)
 
     def __truediv__(self, denominator: Union[float, int, 'Interval']) -> 'Interval':
+        """
+        Divides two intervals. Implemented in the subclass because the
+        implementation is different for VectorizedInterval.
+
+        :param self: The current interval
+        :param denominator: The other interval
+
+        :returns: The quotient of the intervals
+        """
         if isinstance(denominator, (float, int)):
             if denominator == 0:
                 raise ZeroDivisionError("Cannot divide by 0")
@@ -197,6 +218,14 @@ class Interval(BaseInterval[float]):
         return result
 
     def __rtruediv__(self, denominator: Union[float, int]) -> 'Interval':
+        """
+        Divides two intervals.
+        
+        :param denominator: The other interval
+        :param self: The current interval
+
+        :returns: The quotient of the intervals
+        """
         if not isinstance(denominator, (float, int)):
             return NotImplemented
 
@@ -217,6 +246,9 @@ class Interval(BaseInterval[float]):
         return self.a <= x <= self.b
 
     def __pow__(self, n: int) -> 'Interval':
+        """
+        Raises interval to an integer power.
+        """
         if not isinstance(n, int) or n < 1:
             raise ValueError("Exponent must be a positive integer.")
 
