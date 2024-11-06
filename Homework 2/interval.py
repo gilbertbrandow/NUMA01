@@ -25,6 +25,16 @@ class BaseInterval(ABC, Generic[T]):
         pass
 
     def __add__(self, other: Union['BaseInterval[T]', T]) -> Self:
+        """
+        Adds two intervals together. Implemented in the base class because
+        the implementation is same for Interval and VectorizedInterval.
+        
+        :param self: The current interval
+        :param other: The other interval
+        
+        :returns: The sum of the intervals
+        """
+        
         if isinstance(other, BaseInterval):
             return self._create_new_instance(self.a + other.a, self.b + other.b)
         elif isinstance(other, (float, int, np.ndarray)):
@@ -33,9 +43,26 @@ class BaseInterval(ABC, Generic[T]):
             return NotImplemented
 
     def __radd__(self, other: Union['BaseInterval[T]', T]) -> Self:
+        """
+        Adds two intervals together, see __add__.
+
+        :param other: The other interval
+        :param self: The current interval
+        
+        :returns: The sum of the intervals
+        """
         return self.__add__(other)
 
     def __sub__(self, subtrahend: Union['BaseInterval', float, int]) -> Self:
+        """
+        Subtracts two intervals. Implemented in the base class for
+        the same reason as __add__.
+
+        :param self: The current interval
+        :param other: The other interval
+        
+        :returns: The difference of the intervals
+        """
         if isinstance(subtrahend, (float, int)):
             return self._create_new_instance(self.a - subtrahend, self.b - subtrahend)
         elif not isinstance(subtrahend, BaseInterval):
@@ -44,13 +71,29 @@ class BaseInterval(ABC, Generic[T]):
         return self._create_new_instance(self.a - subtrahend.b, self.b - subtrahend.a)
 
     def __rsub__(self, subtrahend: Union[float, int]) -> Self:
+        """
+        Subtracts two intervals together, see __sub__.
+
+        :param other: The other interval
+        :param self: The current interval
+        
+        :returns: The difference of the intervals
+        """
         if isinstance(subtrahend, (float, int)):
             return self._create_new_instance(subtrahend - self.b, subtrahend - self.a)
         return NotImplemented
 
     def __neg__(self) -> Self:
+        """
+        Negates the interval.
+
+        :param self: The current interval
+
+        :returns: The negation of the current interval
+        """
         return self._create_new_instance(-self.b, -self.a)
 
+    # Note: these methods have subclass-specific implementations, so they are abstract here
     @abstractmethod
     def __repr__(self):
         pass
