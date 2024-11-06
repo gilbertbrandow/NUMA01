@@ -130,6 +130,7 @@ def main() -> None:
     :return: None
     """
     task_4(I1=Interval(1, 4), I2=Interval(-2, -1))
+    task_4(I1=VectorizedInterval(np.array([1, 2, 3]), np.array([4, 5, 6])), I2=VectorizedInterval(np.array([-5, -3, -2]), np.array([-4, -2, -1])))
 
     p: Callable[[BaseInterval], BaseInterval] = lambda x: 3 * \
         x**3 - 2*x**2 - 5*x - 1
@@ -145,8 +146,6 @@ def main() -> None:
         x1=np.linspace(0., 1, 1000),
         dx=0.5
     )
-    
-    return
 
     print(measure_time(lambda: evaluate_interval_bounds(
         p=p, x1=np.linspace(0, 1, 5000000), dx=0.5)))
