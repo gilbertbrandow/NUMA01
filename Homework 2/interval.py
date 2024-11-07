@@ -5,7 +5,6 @@ import numpy.typing as npt
 
 T = TypeVar('T', float, npt.NDArray[np.float_])
 
-
 class BaseInterval(ABC, Generic[T]):
     """
     Abstract base class defining the interval interface.
@@ -229,7 +228,7 @@ class Interval(BaseInterval[float]):
         elif not isinstance(factor, Interval):
             return NotImplemented
 
-        products = (
+        products: tuple = (
             self.a * factor.a,
             self.a * factor.b,
             self.b * factor.a,

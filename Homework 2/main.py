@@ -96,7 +96,7 @@ def task_11(
     :param dx: Interval width (added to x1 to create upper bounds).
     :return: None
     """
-    vi = evaluate_vectorized_intervals(p=p, x1=x1, dx=dx)
+    vi: BaseInterval = evaluate_vectorized_intervals(p=p, x1=x1, dx=dx)
 
     plt.figure("Task 11")
     plt.plot(x1, vi.a, label='y1')
@@ -140,7 +140,7 @@ def main() -> None:
         x1=np.linspace(0., 1, 1000),
         dx=0.5
     )
-    
+
     task_11(
         p=p,
         x1=np.linspace(0., 1, 1000),
