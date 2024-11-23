@@ -11,6 +11,8 @@ def main() -> None:
         1.0,
         1e-8
     ))
+    
+    plot_complex_function()
 
     return
 

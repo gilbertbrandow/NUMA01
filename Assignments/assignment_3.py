@@ -26,7 +26,7 @@ def main() -> None:
 
 
 def try_accessing_list() -> None:
-    L = [0, 1, 2, 1, 0, -1, -2, -1, 0]
+    L: list = [0, 1, 2, 1, 0, -1, -2, -1, 0]
 
     print(L[0])
     print(L[- 1])
@@ -53,11 +53,9 @@ def task_4() -> list[list[int]]:
     
     reddistance: list = []
     
-    # Using for loops
     for i in range(1, len(distance)):
         reddistance.append(distance[i][:i])
 
-    # List comprehenstion
     reddistance =  [distance[i][:i] for i in range(1, len(distance))]
     
     return reddistance
