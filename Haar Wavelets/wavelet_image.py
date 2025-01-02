@@ -5,35 +5,47 @@ from PIL import Image
 class WaveletImage:
     def __init__(self, filepath: str) -> None:
         self._image_array: npt.NDArray = self.convert_image_to_array(filepath)
-        self._image_array = self.normalize_array_shape()
 
 
     @property
     def image_array(self) -> npt.NDArray:
-        """
-        Returns the underlying image array.
-        """
         return self._image_array
+    
     
     def convert_image_to_array(self, filepath: str) -> npt.NDArray:
         image: Image.Image = Image.open(filepath)
-        return np.asarray(image)
+        return self.normalize_array_shape(np.asarray(image))
 
 
-    def normalize_array_shape(self) -> npt.NDArray:
-        height: int = self._image_array.shape[0]
-        width: int = self._image_array.shape[1]
+    def normalize_array_shape(self, array: npt.NDArray) -> npt.NDArray:
+        height, width = array.shape[:2]
 
         if height % 2 != 0:
-            self._image_array = self._image_array[:-1, :]
-            
+            array = array[:-1, :]
         if width % 2 != 0:
-            self._image_array = self._image_array[:, :-1]
+            array = array[:, :-1]
 
-        return self._image_array
+        return array
     
     
-    def save_to_file(self, filepath: str="./Resources/new_kvinna.jpg") -> None: 
+    def save_to_file(self, filepath: str) -> None: 
         newimg: Image.Image = Image.fromarray (self._image_array)
         newimg.save (filepath)
         print(f"Image saved to {filepath}")
+        
+        
+    def compute_haar_wavelet_matrix(self, n: int) -> npt.NDArray:
+        if n < 2 or n % 2 != 0:
+            raise ValueError("n must be an even integer greater than or equal to 2.")
+        
+        HWT = np.zeros((n, n))
+
+        for i in range(n // 2):
+            HWT[i, 2 * i] = 1 / np.sqrt(2)
+            HWT[i, 2 * i + 1] = 1 / np.sqrt(2)
+
+        for i in range(n // 2):
+            HWT[n // 2 + i, 2 * i] = 1 / np.sqrt(2)
+            HWT[n // 2 + i, 2 * i + 1] = -1 / np.sqrt(2)
+
+        return HWT
