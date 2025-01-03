@@ -45,7 +45,7 @@ class WaveletImage:
         return self._image_array
     
 
-    def compute_haar_wavelet_matrix(self, n: int, weight: float = np.sqrt(2)) -> npt.NDArray:
+    def compute_haar_wavelet_matrix(self, n: int, weight: float = 1) -> npt.NDArray:
         if n < 2 or n % 2 != 0:
             raise ValueError("n must be an even integer greater than or equal to 2.")
         
@@ -53,29 +53,20 @@ class WaveletImage:
         for i in range(n // 2):
             HWT[i, 2 * i] = weight / 2
             HWT[i, 2 * i + 1] = weight / 2
+            
         for i in range(n // 2):
             HWT[n // 2 + i, 2 * i] = -weight / 2
             HWT[n // 2 + i, 2 * i + 1] = weight / 2
+        
         return HWT
 
 
     def apply_wavelet_transform(self) -> None:
         transformed_rows = self._row_transform_matrix @ self._image_array
-        self._image_array = transformed_rows @ self._col_transform_matrix.T
-
-    def apply_inverse_wavelet_transform(self) -> None:
-        reconstructed_rows = self._row_transform_matrix.T @ self._image_array
-        self._image_array = reconstructed_rows @ self._col_transform_matrix
-        
-    def normalize_image(self) -> npt.NDArray:
-        array = self.image_array
-        normalized = (array - array.min()) / (array.max() - array.min()) * 255
-        return normalized.astype(np.uint8)
-
+        self._image_array = abs((transformed_rows @ self._col_transform_matrix.T)).astype(np.uint8)
 
     def save_image(self, filepath: str) -> None:
-        normalized_array = self.normalize_image()
-        newimg: Image.Image = Image.fromarray(normalized_array)
+        newimg: Image.Image = Image.fromarray(self.image_array)
         newimg.save(filepath)
         print(f"Saved file to '{filepath}'")
             
