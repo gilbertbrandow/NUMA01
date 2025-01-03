@@ -4,6 +4,7 @@ INPUT_FILEPATH: str = "./Resources/kvinna.jpg"
 OUTPUT_FILEPATH: str = "./Resources/new-kvinna.jpg"
 
 def main() -> None:
+    
     manager: WaveletTransformManager = WaveletTransformManager(INPUT_FILEPATH)
 
     for _ in range(3):
