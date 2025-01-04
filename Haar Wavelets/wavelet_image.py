@@ -1,21 +1,13 @@
 import numpy as np
 import numpy.typing as npt
-from PIL import Image
-from typing import Union
 
 class WaveletTransformationError(Exception):
     pass
 
 class WaveletImage:
-    def __init__(self, image_array: Union[npt.NDArray, str]) -> None:
+    def __init__(self, image_array: npt.NDArray) -> None:
         self._image_array: npt.NDArray
-
-        if isinstance(image_array, str):
-            self._image_array = WaveletImage.normalize_array_shape(np.asarray(Image.open(image_array).convert("L")))
-        elif isinstance(image_array, npt.NDArray):
-            self._image_array = WaveletImage.normalize_array_shape(image_array)
-        else:
-            raise TypeError("image_array must be a numpy array or a string")
+        self._image_array = WaveletImage.normalize_array_shape(image_array)
         self._iteration_count: int = 0
 
         #rows, cols = self._image_array.shape[:2]
