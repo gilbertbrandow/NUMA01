@@ -7,15 +7,6 @@ class WaveletTransformationError(Exception):
     pass
 
 class WaveletImage:
-    @staticmethod
-    def normalize_array_shape( array: npt.NDArray) -> npt.NDArray:
-        height, width = array.shape[:2]
-        if height % 2 != 0:
-            array = array[:-1, :]
-        if width % 2 != 0:
-            array = array[:, :-1]
-        return array
-
     def __init__(self, image_array: Union[npt.NDArray, str]) -> None:
         self._image_array: npt.NDArray
 
@@ -35,6 +26,22 @@ class WaveletImage:
     @property
     def image_array(self) -> npt.NDArray:
         return self._image_array
+    
+    
+    @property
+    def iteration_count(self) -> int:
+        return self._iteration_count
+
+
+    @staticmethod
+    def normalize_array_shape( array: npt.NDArray) -> npt.NDArray:
+        height, width = array.shape[:2]
+        if height % 2 != 0:
+            array = array[:-1, :]
+        if width % 2 != 0:
+            array = array[:, :-1]
+        return array
+
 
     @staticmethod
     def compute_haar_wavelet_matrix(n: int, weight: float = np.sqrt(2)) -> npt.NDArray:
@@ -54,31 +61,25 @@ class WaveletImage:
         
         return HWT
 
+
     @staticmethod
     def apply_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         rows, cols = array.shape[:2]
         transformed_rows = WaveletImage.compute_haar_wavelet_matrix(rows) @ array
         return transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T
-    
+
+
     @staticmethod
     def apply_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         rows, cols = array.shape[:2]
         reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(rows).T @ array
         return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
-
-    def save_image(self, filepath: str) -> None:
-        
-        newimg: Image.Image = Image.fromarray(self.image_array).convert("L")
-        newimg.save(filepath)
-        print(f"Saved file to '{filepath}'")
     
-    @property
-    def iteration_count(self) -> int:
-        return self._iteration_count
     
     @staticmethod
     def upper_left_quadrant(array: npt.NDArray) -> npt.NDArray:
         return array[:array.shape[0] // 2, :array.shape[1] // 2]
+    
     
     @staticmethod
     def set_upper_left_corner(array: npt.NDArray, new_corner: npt.NDArray) -> npt.NDArray:
@@ -88,6 +89,7 @@ class WaveletImage:
         
         array[0:new_corner.shape[0], 0:new_corner.shape[1]] = new_corner
         return array
+
 
     def next(self) -> "WaveletImage":
         corner: npt.NDArray = self._image_array.copy()
@@ -130,8 +132,3 @@ class WaveletImage:
                 self.prev()
         
         return self
-    
-
-    def show_image(self) -> None:
-        #TODO: Maybe use pyplot? And maybe display a green border between quadrants for visibility
-        pass

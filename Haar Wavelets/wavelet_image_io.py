@@ -1,3 +1,16 @@
+from PIL import Image
+from wavelet_image import WaveletImage
+
+class WaveletImageIO(object):
+    def save_image(self, wavelet_image: WaveletImage, filepath: str) -> None:
+        newimg: Image.Image = Image.fromarray(wavelet_image.image_array).convert("L")
+        newimg.save(filepath)
+        print(f"Saved file to '{filepath}'")
+        
+    def show_image(self) -> None:
+        #TODO: Maybe use pyplot? And maybe display a green border between quadrants for visibility
+        pass
+
 
 """
 class WaveletTransformManager:
