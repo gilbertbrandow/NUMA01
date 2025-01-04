@@ -35,16 +35,17 @@ class WaveletImageIO(object):
 
 class WaveletImage:
     def __init__(self, image_array: npt.NDArray, weight: int = 1.0) -> None:
-        self._image_array: npt.NDArray = image_array
+        self._image_array: npt.NDArray = self.normalize_array_shape(image_array.copy())
+        self._image_array.setflags(write=True)
         self._current_iteration: int = 0
 
         self._row_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(
-            n=image_array.shape[0],
+            n=self.image_array.shape[0],
             weight=weight
         )
         
         self._col_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(
-            n=image_array.shape[1],
+            n=self.image_array.shape[1],
             weight=weight
         )
 
@@ -57,6 +58,16 @@ class WaveletImage:
     @property
     def current_iteration(self) -> npt.NDArray:
         return self._current_iteration
+
+
+    @staticmethod 
+    def normalize_array_shape(array: npt.NDArray) -> npt.NDArray:
+        height, width = array.shape[:2]
+        if height % 2 != 0:
+            array = array[:-1, :]
+        if width % 2 != 0:
+            array = array[:, :-1]
+        return array
 
 
     @staticmethod
@@ -78,14 +89,26 @@ class WaveletImage:
         return HWT
 
 
+    def get_sub_array_dimensions(self) -> tuple[int, int]:
+        rows: int = int(2**-self.current_iteration * self.image_array.shape[0])
+        columns: int = int(2**-self.current_iteration * self.image_array.shape[1])
+        
+        rows = rows if rows % 2 == 0 else rows - 1
+        columns = columns if columns % 2 == 0 else columns - 1
+        
+        return (rows, columns)
+
+
     def apply_wavelet_transform(self, rows: int, cols: int) -> None:
         subarray: npt.NDArray = self._image_array[:rows, :cols]
         transformed_rows = self._row_transform_matrix[:rows, :rows] @ subarray
-        self._image_array[:rows, :cols] = transformed_rows @ self._col_transform_matrix[:cols, :cols].T
-
+        transformed_subarray = transformed_rows @ self._col_transform_matrix[:cols, :cols].T
+        self._image_array[:rows, :cols] = np.clip(transformed_subarray, 0, 255).astype(np.uint8)
+        
 
     def next(self) -> "WaveletImage":
-        # TODO: apply HWT on subarray
+        rows, cols = self.get_sub_array_dimensions()
+        self.apply_wavelet_transform(rows=rows, cols=cols)
 
         self._current_iteration += 1
         return self

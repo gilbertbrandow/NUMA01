@@ -1,12 +1,12 @@
 from wavelet_image import WaveletImageIO, WaveletImage
 
-INPUT_FILEPATH: str = "./Resources/kvinna.jpg"
-OUTPUT_FILEPATH: str = "./Resources/new-kvinna.jpg"
+INPUT_FILEPATH: str = "./Resources/article-image.gif"
+OUTPUT_FILEPATH: str = "./Resources/new-article-image.jpg"
 
 def main() -> None:
     wavelet_image: WaveletImage = WaveletImageIO.from_file(INPUT_FILEPATH)
     
-    wavelet_image.next().next().next().prev().go_to_iteration(1).next()
+    wavelet_image.next().next()
     
     print(f"This is the current iteration: {wavelet_image.current_iteration}")
     
