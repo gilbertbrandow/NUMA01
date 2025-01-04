@@ -31,6 +31,18 @@ class WaveletImageIO(object):
     @staticmethod 
     def to_bytes(wavelet_image: "WaveletImage") -> str: 
         pass
+    
+
+    @staticmethod
+    def save_quadrants(self, wavelet_image: "WaveletImage") -> None:
+        # TODO: The whole purpose of haar wavelet is the ability to send an image in parts, maybe we should implement this functionality?
+        pass
+    
+    
+    @staticmethod
+    def reconstruct_from_quadrants(quadrants: dict[str, npt.NDArray]) -> "WaveletImage":
+        # TODO: Reconstruct WaveletImage from quadrants
+        pass
 
 
 class WaveletImage:
@@ -140,5 +152,5 @@ class WaveletImage:
     
 
     def show_image(self) -> None:
-        #TODO: Maybe use pyplot?
+        #TODO: Maybe use pyplot? And maybe display a green border between quadrants for visibility
         pass
