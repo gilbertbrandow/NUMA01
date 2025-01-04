@@ -120,11 +120,11 @@ class WaveletImage:
     def go_to_iteration(self, iteration: int) -> "WaveletImage":
         if iteration < 0:
             raise WaveletTransformationError("Can not inverse transformation beyond original image.")
-        elif abs(iteration - self.current_iteration) > 10:
+        elif abs(iteration - self.iteration_count) > 10:
             raise WaveletTransformationError("Too many iterations.")
 
-        while self.current_iteration != iteration:
-            if self.current_iteration < iteration:
+        while self.iteration_count != iteration:
+            if self.iteration_count < iteration:
                 self.next()
             else:
                 self.prev()
