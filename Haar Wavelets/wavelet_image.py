@@ -67,7 +67,7 @@ class WaveletImage:
     
 
     @staticmethod
-    def compute_haar_wavelet_matrix(n: int, weight: float = 1) -> npt.NDArray:
+    def compute_haar_wavelet_matrix(n: int, weight: float = np.sqrt(2)) -> npt.NDArray:
         if n < 2 or n % 2 != 0:
             raise ValueError("n must be an even integer greater than or equal to 2.")
         
@@ -86,16 +86,16 @@ class WaveletImage:
     def apply_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         rows, cols = array.shape[:2]
         transformed_rows = WaveletImage.compute_haar_wavelet_matrix(rows) @ array
-        return abs((transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T)).astype(np.uint8)
+        return transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T
     
     @staticmethod
     def apply_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         rows, cols = array.shape[:2]
         reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(rows).T @ array
-        return abs(reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)).astype(np.uint8)
+        return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
 
     def save_image(self, filepath: str) -> None:
-        newimg: Image.Image = Image.fromarray(self.image_array)
+        newimg: Image.Image = Image.fromarray(self.image_array).convert("L")
         newimg.save(filepath)
         print(f"Saved file to '{filepath}'")
     
@@ -109,15 +109,19 @@ class WaveletImage:
     
     @staticmethod
     def set_upper_left_corner(array: npt.NDArray, new_corner: npt.NDArray) -> npt.NDArray:
-        array[:new_corner.shape[0], :new_corner.shape[1]] = new_corner
+
+        if array.shape == new_corner.shape: # Why does removing this break the code?
+            return new_corner
+        array[0:new_corner.shape[0], 0:new_corner.shape[1]] = new_corner
         return array
 
     def next(self) -> "WaveletImage":
-        corner: npt.NDArray = self._image_array
+        corner: npt.NDArray = self._image_array.copy()
         for _ in range(self._iteration_count): # If we're e.g. one iteration deep, no corner needed (use entire image)
             corner = WaveletImage.upper_left_quadrant(corner)
-
-        self._image_array = WaveletImage.set_upper_left_corner(self._image_array.copy(), WaveletImage.apply_wavelet_transform(WaveletImage.normalize_array_shape(corner)))
+    
+        corner = WaveletImage.apply_wavelet_transform(WaveletImage.normalize_array_shape(corner))
+        self._image_array = WaveletImage.set_upper_left_corner(self._image_array.copy(), corner)
         
         self._iteration_count += 1
         return self
@@ -127,7 +131,7 @@ class WaveletImage:
         if self._iteration_count == 0:
             raise Exception("Cannot go back further")
         
-        corner: npt.NDArray = self._image_array
+        corner: npt.NDArray = self._image_array.copy()
         for _ in range(self._iteration_count - 1):
             corner = WaveletImage.upper_left_quadrant(corner)
         
