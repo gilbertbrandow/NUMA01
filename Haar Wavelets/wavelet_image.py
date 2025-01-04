@@ -1,7 +1,14 @@
 import numpy as np
 import numpy.typing as npt
 from PIL import Image
+from typing import Union
 
+"""
+class WaveletTransformManager:
+    def __init__(self, filepath: str) -> None:
+        self._original_image: npt.NDArray = self.convert_image_to_array(filepath)
+        self._history: list[WaveletImage] = [WaveletImage(self._original_image.copy())]
+=======
 
 class WaveletTransformationError(Exception):
     pass
@@ -43,37 +50,11 @@ class WaveletImageIO(object):
     def reconstruct_from_quadrants(quadrants: dict[str, npt.NDArray]) -> "WaveletImage":
         # TODO: Reconstruct WaveletImage from quadrants
         pass
-
+    """
 
 class WaveletImage:
-    def __init__(self, image_array: npt.NDArray, weight: int = 1.0) -> None:
-        self._image_array: npt.NDArray = self.normalize_array_shape(image_array.copy())
-        self._image_array.setflags(write=True)
-        self._current_iteration: int = 0
-
-        self._row_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(
-            n=self.image_array.shape[0],
-            weight=weight
-        )
-        
-        self._col_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(
-            n=self.image_array.shape[1],
-            weight=weight
-        )
-
-
-    @property
-    def image_array(self) -> npt.NDArray:
-        return self._image_array
-
-
-    @property
-    def current_iteration(self) -> npt.NDArray:
-        return self._current_iteration
-
-
-    @staticmethod 
-    def normalize_array_shape(array: npt.NDArray) -> npt.NDArray:
+    @staticmethod
+    def normalize_array_shape( array: npt.NDArray) -> npt.NDArray:
         height, width = array.shape[:2]
         if height % 2 != 0:
             array = array[:-1, :]
@@ -81,9 +62,28 @@ class WaveletImage:
             array = array[:, :-1]
         return array
 
+    def __init__(self, image_array: Union[npt.NDArray, str]) -> None:
+        self._image_array: npt.NDArray
+
+        if isinstance(image_array, str):
+            self._image_array = WaveletImage.normalize_array_shape(np.asarray(Image.open(image_array).convert("L")))
+        elif isinstance(image_array, npt.NDArray):
+            self._image_array = WaveletImage.normalize_array_shape(image_array)
+        else:
+            raise TypeError("image_array must be a numpy array or a string")
+        self._iteration_count: int = 0
+
+        #rows, cols = self._image_array.shape[:2]
+        #self._row_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(rows)
+        #self._col_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(cols)
+
+
+    @property
+    def image_array(self) -> npt.NDArray:
+        return self._image_array
 
     @staticmethod
-    def compute_haar_wavelet_matrix(n: int, weight: float = 1.0) -> npt.NDArray:
+    def compute_haar_wavelet_matrix(n: int, weight: float = np.sqrt(2)) -> npt.NDArray:
         if n < 2 or n % 2 != 0:
             raise ValueError(
                 "n must be an even integer greater than or equal to 2.")
@@ -91,14 +91,79 @@ class WaveletImage:
         HWT: npt.NDArray = np.zeros((n, n))
 
         for i in range(n // 2):
-            HWT[i, 2 * i] = weight / 2
-            HWT[i, 2 * i + 1] = weight / 2
-
+            HWT[i, 2 * i] = weight / 2.0
+            HWT[i, 2 * i + 1] = weight / 2.0
+            
         for i in range(n // 2):
-            HWT[n // 2 + i, 2 * i] = -weight / 2
-            HWT[n // 2 + i, 2 * i + 1] = weight / 2
-
+            HWT[n // 2 + i, 2 * i] = -weight / 2.0
+            HWT[n // 2 + i, 2 * i + 1] = weight / 2.0
+        
         return HWT
+
+    @staticmethod
+    def apply_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
+        rows, cols = array.shape[:2]
+        transformed_rows = WaveletImage.compute_haar_wavelet_matrix(rows) @ array
+        return transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T
+    
+    @staticmethod
+    def apply_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
+        rows, cols = array.shape[:2]
+        reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(rows).T @ array
+        return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
+
+    def save_image(self, filepath: str) -> None:
+        if not self.iteration_count is 0: 
+            self._image_array *= 1/np.sqrt(2)
+            pass
+        
+        
+        newimg: Image.Image = Image.fromarray(self.image_array * 1/np.sqrt(2) ** self.iteration_count).convert("L")
+        newimg.save(filepath)
+        print(f"Saved file to '{filepath}'")
+    
+    @property
+    def iteration_count(self) -> int:
+        return self._iteration_count
+    
+    @staticmethod
+    def upper_left_quadrant(array: npt.NDArray) -> npt.NDArray:
+        return array[:array.shape[0] // 2, :array.shape[1] // 2]
+    
+    @staticmethod
+    def set_upper_left_corner(array: npt.NDArray, new_corner: npt.NDArray) -> npt.NDArray:
+
+        if array.shape == new_corner.shape:
+            return new_corner
+        
+        array[0:new_corner.shape[0], 0:new_corner.shape[1]] = new_corner
+        return array
+
+    def next(self) -> "WaveletImage":
+        corner: npt.NDArray = self._image_array.copy()
+        for _ in range(self._iteration_count): # If we're e.g. one iteration deep, no corner needed (use entire image)
+            corner = WaveletImage.upper_left_quadrant(corner)
+    
+        corner = WaveletImage.apply_wavelet_transform(WaveletImage.normalize_array_shape(corner))
+        self._image_array = WaveletImage.set_upper_left_corner(self._image_array.copy(), corner)
+        
+        self._iteration_count += 1
+        return self
+    
+    
+    def prev(self) -> "WaveletImage":
+        if self._iteration_count == 0:
+            raise Exception("Cannot go back further")
+        
+        corner: npt.NDArray = self._image_array.copy()
+        for _ in range(self._iteration_count - 1):
+            corner = WaveletImage.upper_left_quadrant(corner)
+        
+        corner = WaveletImage.apply_inverse_wavelet_transform(WaveletImage.normalize_array_shape(corner))
+        self._image_array = WaveletImage.set_upper_left_corner(self._image_array.copy(), corner)
+
+        self._iteration_count -= 1
+        return self
 
 
     def get_sub_array_dimensions(self) -> tuple[int, int]:
