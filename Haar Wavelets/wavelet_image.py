@@ -3,6 +3,9 @@ import numpy.typing as npt
 from PIL import Image
 from typing import Union
 
+class WaveletTransformationError(Exception):
+    pass
+
 """
 class WaveletTransformManager:
     def __init__(self, filepath: str) -> None:
@@ -113,7 +116,7 @@ class WaveletImage:
         return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
 
     def save_image(self, filepath: str) -> None:
-        if not self.iteration_count is 0: 
+        if self.iteration_count != 0: 
             self._image_array *= 1/np.sqrt(2)
             pass
         
@@ -163,41 +166,6 @@ class WaveletImage:
         self._image_array = WaveletImage.set_upper_left_corner(self._image_array.copy(), corner)
 
         self._iteration_count -= 1
-        return self
-
-
-    def get_sub_array_dimensions(self) -> tuple[int, int]:
-        rows: int = int(2**-self.current_iteration * self.image_array.shape[0])
-        columns: int = int(2**-self.current_iteration * self.image_array.shape[1])
-        
-        rows = rows if rows % 2 == 0 else rows - 1
-        columns = columns if columns % 2 == 0 else columns - 1
-        
-        return (rows, columns)
-
-
-    def apply_wavelet_transform(self, rows: int, cols: int) -> None:
-        subarray: npt.NDArray = self._image_array[:rows, :cols]
-        transformed_rows = self._row_transform_matrix[:rows, :rows] @ subarray
-        transformed_subarray = transformed_rows @ self._col_transform_matrix[:cols, :cols].T
-        self._image_array[:rows, :cols] = np.clip(transformed_subarray, 0, 255).astype(np.uint8)
-        
-
-    def next(self) -> "WaveletImage":
-        rows, cols = self.get_sub_array_dimensions()
-        self.apply_wavelet_transform(rows=rows, cols=cols)
-
-        self._current_iteration += 1
-        return self
-
-
-    def prev(self) -> "WaveletImage":
-        if (self.current_iteration == 0):
-            raise WaveletTransformationError("Can not inverse transformation beyond original image.")
-
-        # TODO: Inverse HWT on subarray
-
-        self._current_iteration -= 1
         return self
 
 
