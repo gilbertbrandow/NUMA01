@@ -92,7 +92,7 @@ class WaveletImage:
     def apply_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         rows, cols = array.shape[:2]
         reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(rows).T @ array
-        return abs(reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)).astype(np.uint8)
+        return np.clip(reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).astype(np.uint8), 0, 255)
 
     def save_image(self, filepath: str) -> None:
         newimg: Image.Image = Image.fromarray(self.image_array)

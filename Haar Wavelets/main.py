@@ -5,8 +5,7 @@ OUTPUT_FILEPATH: str = "./Resources/new-kvinna.jpg"
 
 def main() -> None:
     wi: WaveletImage = WaveletImage(INPUT_FILEPATH)
-    wi.next()
-    wi.prev()
+    wi.next().next()
     wi.save_image(OUTPUT_FILEPATH)
 
     """
