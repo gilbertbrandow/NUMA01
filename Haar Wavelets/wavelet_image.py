@@ -9,11 +9,7 @@ class WaveletImage:
         self._image_array: npt.NDArray
         self._image_array = WaveletImage.normalize_array_shape(image_array)
         self._iteration_count: int = 0
-
-        #rows, cols = self._image_array.shape[:2]
-        #self._row_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(rows)
-        #self._col_transform_matrix: npt.NDArray = self.compute_haar_wavelet_matrix(cols)
-
+        
 
     @property
     def image_array(self) -> npt.NDArray:
@@ -98,7 +94,7 @@ class WaveletImage:
     
     def prev(self) -> "WaveletImage":
         if self._iteration_count == 0:
-            raise Exception("Cannot go back further")
+            raise WaveletTransformationError("Cannot inverse transformation on original image")
         
         corner: npt.NDArray = self._image_array.copy()
         for _ in range(self._iteration_count - 1):
