@@ -95,7 +95,12 @@ class WaveletImage:
         return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
 
     def save_image(self, filepath: str) -> None:
-        newimg: Image.Image = Image.fromarray(self.image_array).convert("L")
+        if not self.iteration_count is 0: 
+            self._image_array *= 1/np.sqrt(2)
+            pass
+        
+        
+        newimg: Image.Image = Image.fromarray(self.image_array * 1/np.sqrt(2) ** self.iteration_count).convert("L")
         newimg.save(filepath)
         print(f"Saved file to '{filepath}'")
     
@@ -110,8 +115,9 @@ class WaveletImage:
     @staticmethod
     def set_upper_left_corner(array: npt.NDArray, new_corner: npt.NDArray) -> npt.NDArray:
 
-        if array.shape == new_corner.shape: # Why does removing this break the code?
+        if array.shape == new_corner.shape:
             return new_corner
+        
         array[0:new_corner.shape[0], 0:new_corner.shape[1]] = new_corner
         return array
 
