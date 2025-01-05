@@ -14,13 +14,16 @@ class WaveletImage:
 
         self._iteration_count: int = 0
 
+
     @property
     def image_array(self) -> npt.NDArray:
         return self._image_array
 
+
     @property
     def iteration_count(self) -> int:
         return self._iteration_count
+
 
     @staticmethod
     def normalize_array_shape(array: npt.NDArray) -> npt.NDArray:
@@ -31,11 +34,13 @@ class WaveletImage:
             array = array[:, :-1]
         return array
 
+
     @staticmethod
     def compute_haar_wavelet_matrix(n: int, weight: float = np.sqrt(2)) -> npt.NDArray:
         if n < 2 or n % 2 != 0:
             raise ValueError(
-                "n must be an even integer greater than or equal to 2.")
+                "n must be an even integer greater than or equal to 2."
+            )
 
         HWT: npt.NDArray = np.zeros((n, n))
 
@@ -49,6 +54,7 @@ class WaveletImage:
 
         return HWT
 
+
     @staticmethod
     def apply_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         rows, cols = array.shape[:2]
@@ -56,12 +62,14 @@ class WaveletImage:
             rows) @ array
         return transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T
 
+
     @staticmethod
     def apply_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         rows, cols = array.shape[:2]
         reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(
             rows).T @ array
         return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
+
 
     def get_subarray_shape(self) -> tuple[int, int]:
         height, width = self._image_array.shape
@@ -72,14 +80,16 @@ class WaveletImage:
 
         return (subarray_height, subarray_width)
 
-    def set_L_L_quadrant(self, new_corner: npt.NDArray) -> "WaveletImage":
+
+    def set_L_L_quadrant(self, new_quadrant: npt.NDArray) -> "WaveletImage":
         if self.iteration_count == 0:
-            self._image_array = new_corner
+            self._image_array = new_quadrant
             return None
 
-        self._image_array[0:new_corner.shape[0],
-                          0:new_corner.shape[1]] = new_corner
+        self._image_array[0:new_quadrant.shape[0],
+                          0:new_quadrant.shape[1]] = new_quadrant
         return self
+
 
     def next(self) -> "WaveletImage":
         height, width = self.get_subarray_shape()
@@ -95,10 +105,12 @@ class WaveletImage:
 
         corner = WaveletImage.apply_wavelet_transform(
             WaveletImage.normalize_array_shape(corner))
-        self.set_L_L_quadrant(new_corner=corner)
+        
+        self.set_L_L_quadrant(new_quadrant=corner)
 
         self._iteration_count += 1
         return self
+
 
     def prev(self) -> "WaveletImage":
         if self._iteration_count == 0:
@@ -113,7 +125,8 @@ class WaveletImage:
         corner = WaveletImage.apply_inverse_wavelet_transform(
             WaveletImage.normalize_array_shape(corner))
 
-        return self.set_L_L_quadrant(new_corner=corner)
+        return self.set_L_L_quadrant(new_quadrant=corner)
+
 
     def go_to_iteration(self, iteration: int) -> "WaveletImage":
         if iteration < 0:
