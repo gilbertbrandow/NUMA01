@@ -6,8 +6,9 @@ class WaveletTransformationError(Exception):
 
 class WaveletImage:
     def __init__(self, image_array: npt.NDArray) -> None:
-        self._image_array: npt.NDArray
-        self._image_array = WaveletImage.normalize_array_shape(image_array)
+        self._image_array: npt.NDArray = WaveletImage.normalize_array_shape(image_array).copy()
+        self._image_array.setflags(write=True)
+        
         self._iteration_count: int = 0
         
 
@@ -64,29 +65,31 @@ class WaveletImage:
         return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
     
     
-    @staticmethod
-    def upper_left_quadrant(array: npt.NDArray) -> npt.NDArray:
-        return array[:array.shape[0] // 2, :array.shape[1] // 2]
+    def get_subarray_shape(self) -> tuple[int, int]:
+        height, width = self._image_array.shape
     
-    
-    @staticmethod
-    def set_upper_left_corner(array: npt.NDArray, new_corner: npt.NDArray) -> npt.NDArray:
-
-        if array.shape == new_corner.shape:
-            return new_corner
+        factor: float = 2 ** -self.iteration_count
+        subarray_height: int = int(height * factor)
+        subarray_width: int  = int(width * factor)
         
-        array[0:new_corner.shape[0], 0:new_corner.shape[1]] = new_corner
-        return array
+        return (subarray_height, subarray_width)
+
+    
+    def set_L_L_quadrant(self, new_corner: npt.NDArray) -> "WaveletImage":
+        if self.iteration_count == 0:
+            self._image_array = new_corner
+            return None
+        
+        self._image_array[0:new_corner.shape[0], 0:new_corner.shape[1]] = new_corner
+        return self
 
 
     def next(self) -> "WaveletImage":
-        corner: npt.NDArray = self._image_array.copy()
-        
-        for _ in range(self._iteration_count): # If we're e.g. one iteration deep, no corner needed (use entire image)
-            corner = WaveletImage.upper_left_quadrant(corner)
+        height, width = self.get_subarray_shape()
+        corner: npt.NDArray = self._image_array.copy()[:int(height), :int(width)]
     
         corner = WaveletImage.apply_wavelet_transform(WaveletImage.normalize_array_shape(corner))
-        self._image_array = WaveletImage.set_upper_left_corner(self._image_array.copy(), corner)
+        self.set_L_L_quadrant(new_corner=corner)
         
         self._iteration_count += 1
         return self
@@ -95,23 +98,20 @@ class WaveletImage:
     def prev(self) -> "WaveletImage":
         if self._iteration_count == 0:
             raise WaveletTransformationError("Cannot inverse transformation on original image")
-        
-        corner: npt.NDArray = self._image_array.copy()
-        for _ in range(self._iteration_count - 1):
-            corner = WaveletImage.upper_left_quadrant(corner)
-        
-        corner = WaveletImage.apply_inverse_wavelet_transform(WaveletImage.normalize_array_shape(corner))
-        self._image_array = WaveletImage.set_upper_left_corner(self._image_array.copy(), corner)
 
         self._iteration_count -= 1
-        return self
+        
+        height, width = self.get_subarray_shape()
+        corner: npt.NDArray = self._image_array.copy()[:int(height), :int(width)]
+        corner = WaveletImage.apply_inverse_wavelet_transform(WaveletImage.normalize_array_shape(corner))
+        
+        
+        return self.set_L_L_quadrant(new_corner=corner)
 
 
     def go_to_iteration(self, iteration: int) -> "WaveletImage":
         if iteration < 0:
             raise WaveletTransformationError("Can not inverse transformation beyond original image.")
-        elif abs(iteration - self.iteration_count) > 10:
-            raise WaveletTransformationError("Too many iterations.")
 
         while self.iteration_count != iteration:
             if self.iteration_count < iteration:
