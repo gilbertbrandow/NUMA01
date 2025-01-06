@@ -6,10 +6,9 @@ from wavelet_image import WaveletImage
 from PIL import Image
 
 class AbstractWaveletImage(ABC):
-    @abstractmethod
-    #@property
+    @property
     def image_array(self) -> npt.NDArray:
-        pass
+        return np.array([])
     
     @abstractmethod
     def next(self, matrix_multiplication: bool = True) -> Self:
@@ -46,7 +45,7 @@ class RGBWaveletImage(AbstractWaveletImage):
         self._blue.go_to_iteration(iteration=iteration, matrix_multiplication=matrix_multiplication)
         return self
     
-    #@property
+    @property
     def image_array(self) -> npt.NDArray:
         r = np.asarray(Image.fromarray(self._red._image_array).convert("L"))
         g = np.asarray(Image.fromarray(self._green._image_array).convert("L"))
