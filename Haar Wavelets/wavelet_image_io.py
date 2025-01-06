@@ -1,20 +1,21 @@
 from PIL import Image
 import numpy.typing as npt
 import numpy as np
-from wavelet_image import WaveletImage
+#from wavelet_image import WaveletImage
+from rgb_wavelet_image import RGBWaveletImage
 
 class WaveletImageIO(object):
     @staticmethod
-    def from_file(filepath: str) -> "WaveletImage":
-        image: Image.Image = Image.open(filepath).convert("L")
+    def from_file(filepath: str) -> RGBWaveletImage:
+        image: Image.Image = Image.open(filepath).convert("RGB")
         array: npt.NDArray = np.asarray(image)
-        return WaveletImage(array)
-
+        return RGBWaveletImage(array)
 
     @staticmethod
-    def to_file(wavelet_image: "WaveletImage", filepath: str, only_compressed: bool = False) -> None:
+    def to_file(wavelet_image: "RGBWaveletImage", filepath: str, only_compressed: bool = False) -> None:
         #TODO: Handle cases where only the subarray (upper left) image should be saved
-        img: Image.Image = Image.fromarray(wavelet_image.image_array).convert("L")
+        #wavelet_image._blue.next().prev()
+        img: Image.Image = Image.fromarray(wavelet_image.image_array())
 
         img.save(filepath)
         print(f"Saved image to {filepath}")

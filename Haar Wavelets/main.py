@@ -1,5 +1,6 @@
 from wavelet_image import WaveletImage
 from wavelet_image_io import WaveletImageIO
+from rgb_wavelet_image import RGBWaveletImage
 import time
 
 INPUT_FILEPATH: str = "./Resources/article-image.gif"
@@ -7,12 +8,12 @@ OUTPUT_FILEPATH: str = "./Resources/new-article-image.gif"
 
 def main() -> None:
     
-    wi: WaveletImage = WaveletImageIO.from_file(filepath=INPUT_FILEPATH)
-    wi.go_to_iteration(2, matrix_multiplication=True)
+    wi: RGBWaveletImage = WaveletImageIO.from_file(filepath=INPUT_FILEPATH)
+    #wi.go_to_iteration(2, matrix_multiplication=True)
     
-    wi.next().next().go_to_iteration(0)
+    wi.next().prev().go_to_iteration(0)
     
-    wi.next(matrix_multiplication=True).prev(matrix_multiplication=True)
+    #wi.next(matrix_multiplication=True).prev(matrix_multiplication=True)
     
     WaveletImageIO.to_file(wavelet_image=wi, filepath=OUTPUT_FILEPATH)
     
