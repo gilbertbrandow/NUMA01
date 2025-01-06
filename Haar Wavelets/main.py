@@ -2,8 +2,8 @@ from wavelet_image import WaveletImage
 from wavelet_image_io import WaveletImageIO
 import time
 
-INPUT_FILEPATH: str = "./Resources/kvinna.jpg"
-OUTPUT_FILEPATH: str = "./Resources/new-kvinna.jpg"
+INPUT_FILEPATH: str = "./Resources/article-image.gif"
+OUTPUT_FILEPATH: str = "./Resources/new-article-image.gif"
 
 def main() -> None:
     
@@ -29,7 +29,6 @@ def print_time_difference(filepath: str, number_of_iterations: int = 5, revert_b
     if revert_back_to_original:
         wi_matrix.go_to_iteration(0, matrix_multiplication=True)
     
-    
     matrix_time: float = time.time() - start
 
     start: float = time.time()
@@ -37,7 +36,6 @@ def print_time_difference(filepath: str, number_of_iterations: int = 5, revert_b
     
     if revert_back_to_original:
         wi_manual.go_to_iteration(0, matrix_multiplication=False)
-    
     
     manual_time: float = time.time() - start
 
