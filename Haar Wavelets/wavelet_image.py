@@ -84,7 +84,7 @@ class WaveletImage:
     def set_L_L_quadrant(self, new_quadrant: npt.NDArray) -> "WaveletImage":
         if self.iteration_count == 0:
             self._image_array = new_quadrant
-            return None
+            return self
 
         self._image_array[0:new_quadrant.shape[0],
                           0:new_quadrant.shape[1]] = new_quadrant
