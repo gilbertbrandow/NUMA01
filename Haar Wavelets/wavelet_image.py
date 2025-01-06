@@ -63,9 +63,41 @@ class WaveletImage:
         return transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T
     
     
-    @staticmethod 
-    def apply_manual_wavelet_transform(array: npt.NDArray) -> npt.NDArray: 
-        pass
+    @staticmethod
+    def apply_manual_wavelet_transform(array: npt.NDArray, weight: float = np.sqrt(2)) -> npt.NDArray:
+        rows: int = array.shape[0]
+        cols: int = array.shape[1]
+        temp: npt.NDArray = np.zeros((rows, cols), dtype=float)
+        out: npt.NDArray = np.zeros((rows, cols), dtype=float)
+        factor: float = weight / 2.0
+
+        for r in range(rows):
+            row: npt.NDArray = array[r, :]
+            half: int = cols // 2
+            sums: npt.NDArray = np.zeros(half, dtype=float)
+            diffs: npt.NDArray = np.zeros(half, dtype=float)
+            for i in range(half):
+                x: float = np.clip(row[2 * i], 0, 255)
+                y: float = np.clip(row[2 * i + 1], 0, 255)
+                sums[i] = factor * (x + y)
+                diffs[i] = factor * (x - y)
+            temp[r, :half] = sums
+            temp[r, half:] = diffs
+
+        for c in range(cols):
+            col: npt.NDArray = temp[:, c]
+            half: int = rows // 2
+            sums: npt.NDArray = np.zeros(half, dtype=float)
+            diffs: npt.NDArray = np.zeros(half, dtype=float)
+            for i in range(half):
+                x: float = np.clip(col[2 * i], 0, 255)
+                y: float = np.clip(col[2 * i + 1], 0, 255)
+                sums[i] = factor * (x + y)
+                diffs[i] = factor * (x - y)
+            out[:half, c] = sums
+            out[half:, c] = diffs
+
+        return out
 
 
     @staticmethod
@@ -76,9 +108,45 @@ class WaveletImage:
         return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
 
 
-    @staticmethod 
-    def apply_manual_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray: 
-        pass
+    @staticmethod
+    def apply_manual_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
+        rows: int = array.shape[0]
+        cols: int = array.shape[1]
+        temp: npt.NDArray = np.zeros((rows, cols), dtype=float)
+        out: npt.NDArray = np.zeros((rows, cols), dtype=float)
+        factor: float = 1.0 / np.sqrt(2.0)
+
+        for c in range(cols):
+            col: npt.NDArray = array[:, c]
+            half: int = rows // 2
+            sums: npt.NDArray = col[:half]
+            diffs: npt.NDArray = col[half:]
+            reconstructed: npt.NDArray = np.zeros(rows, dtype=float)
+            for i in range(half):
+                s: float = sums[i]
+                d: float = diffs[i]
+                x: float = factor * (s + d)
+                y: float = factor * (s - d)
+                reconstructed[2 * i] = x
+                reconstructed[2 * i + 1] = y
+            temp[:, c] = reconstructed
+
+        for r in range(rows):
+            row: npt.NDArray = temp[r, :]
+            half: int = cols // 2
+            sums: npt.NDArray = row[:half]
+            diffs: npt.NDArray = row[half:]
+            reconstructed: npt.NDArray = np.zeros(cols, dtype=float)
+            for i in range(half):
+                s: float = sums[i]
+                d: float = diffs[i]
+                x: float = factor * (s + d)
+                y: float = factor * (s - d)
+                reconstructed[2 * i] = x
+                reconstructed[2 * i + 1] = y
+            out[r, :] = reconstructed
+
+        return out
 
 
     def get_subarray_shape(self) -> tuple[int, int]:
