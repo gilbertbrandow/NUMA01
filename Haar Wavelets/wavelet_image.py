@@ -333,7 +333,20 @@ class WaveletImage(AbstractWaveletImage):
         return self
 
 class RGBWaveletImage(AbstractWaveletImage):
+    """
+    An RGB wavelet image. Performs the wavelet transformation on each of
+    the three channels separately.
+
+    :author: Egor Jakimov.
+    """
+
     def __init__(self, image_array: npt.NDArray):
+        """
+        Creates an RGB wavelet image from the array created from a
+        PIL image.
+
+        :param image_array: The image array. 
+        """
         channels: npt.NDArray = np.transpose(image_array, (2, 0, 1))
         self._channels: list[WaveletImage] = [
             WaveletImage(channels[i]) for i in range(channels.shape[0])
@@ -342,11 +355,24 @@ class RGBWaveletImage(AbstractWaveletImage):
 
     @property
     def channels(self) -> list[WaveletImage]:
+        """
+        Returns the three wavelet images comprising this RGB wavelet image
+
+        :return: The three wavelet images
+        """
         return self._channels
 
 
     @property
     def image_array(self) -> npt.NDArray:
+        """
+        Gets the three channels' image arrays, and converts them to a format
+        supported by PIL. (PIL doesn't support floating-point RGB images, so
+        we need to make them 8-bit by passing them through PIL.)
+
+        :return: The NumPy array
+        """
+
         channel_arrays: list[npt.NDArray] = []
         
         for wavelet_channel in self._channels:
@@ -359,18 +385,41 @@ class RGBWaveletImage(AbstractWaveletImage):
     
     
     def next(self, matrix_multiplication: bool = True) -> Self:
+        """
+        Perform a Haar wavelet transformation on each channel.
+
+        :param matrix_multiplication: Whether to use matrix multiplication or not
+        :return: The image
+        """
+
         for channel in self._channels:
             channel.next(matrix_multiplication=matrix_multiplication)
         return self
 
 
     def prev(self, matrix_multiplication: bool = True) -> Self:
+        """
+        Perform an Inverse Haar wavelet transformation on each channel.
+
+        :param matrix_multiplication: Whether to use matrix multiplication or not
+        :return: The image
+        """
+
         for channel in self._channels:
             channel.prev(matrix_multiplication=matrix_multiplication)
         return self
 
 
     def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> Self:
+        """
+        Perform (inverse) wavelet transformations until a specific iteration level
+        is reached.
+
+        :param iteration: The target iteration level
+        :param matrix_multiplication: Whether to use matrix multiplication or not
+        :return: The image
+        """
+
         for channel in self._channels:
             channel.go_to_iteration(
                 iteration=iteration,
