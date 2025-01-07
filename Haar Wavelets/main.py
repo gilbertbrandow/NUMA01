@@ -1,14 +1,24 @@
 from wavelet_image import WaveletImage
 from wavelet_image_io import WaveletImageIO
-from rgb_wavelet_image import RGBWaveletImage
+from rgb_wavelet_image import RGBWaveletImage, AbstractWaveletImage
 import time
+import sys
 
 INPUT_FILEPATH: str = "./Resources/colors.png"
 OUTPUT_FILEPATH: str = "./Resources/new-colors.png"
 
 def main() -> None:
+    only_grayscale: bool = True
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "-r":
+            only_grayscale = False
+        elif sys.argv[1] == "-g":
+            only_grayscale = True
+        else:
+            print("Usage: python main.py [-r|-g] (r for RGB, g for grayscale)")
+            exit()
     
-    wi: RGBWaveletImage = WaveletImageIO.from_file(filepath=INPUT_FILEPATH)
+    wi: AbstractWaveletImage = WaveletImageIO.from_file(filepath=INPUT_FILEPATH, only_grayscale=only_grayscale)
     
     wi.next().prev().go_to_iteration(0)
         
@@ -29,7 +39,7 @@ def print_time_difference(filepath: str, number_of_iterations: int = 5, revert_b
     
     matrix_time: float = time.time() - start
 
-    start: float = time.time()
+    start = time.time()
     wi_manual.go_to_iteration(iteration=number_of_iterations, matrix_multiplication=False)
     
     if revert_back_to_original:
