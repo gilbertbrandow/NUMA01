@@ -1,8 +1,7 @@
 from PIL import Image
 import numpy.typing as npt
 import numpy as np
-from rgb_wavelet_image import AbstractWaveletImage, RGBWaveletImage
-from wavelet_image import WaveletImage
+from wavelet_image import AbstractWaveletImage, WaveletImage, RGBWaveletImage
 
 class WaveletImageIO(object):
     @staticmethod
@@ -15,12 +14,9 @@ class WaveletImageIO(object):
         :param only_grayscale: A flag for determining if preserving rgb values or not, 
         :return: an AbstractWaveletImage, either RGB or grayscale
         """
-        if only_grayscale: 
-            image: Image.Image = Image.open(filepath).convert("L")
-            return WaveletImage(np.asarray(image)) 
-        
-        image: Image.Image = Image.open(filepath).convert("RGB")
-        return RGBWaveletImage(np.asarray(image))
+        image: Image.Image = Image.open(filepath).convert("L" if only_grayscale else "RGB")
+        return WaveletImage(np.asarray(image)) 
+    
     
     @staticmethod
     def to_file(wavelet_image: AbstractWaveletImage, filepath: str) -> None:

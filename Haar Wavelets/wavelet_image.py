@@ -1,12 +1,30 @@
 import numpy as np
 import numpy.typing as npt
-
+from abc import ABC, abstractmethod
+from typing import Self
+from PIL import Image
 
 class WaveletTransformationError(Exception):
     pass
 
+class AbstractWaveletImage(ABC):
+    @property
+    def image_array(self) -> npt.NDArray:
+        return np.array([])
+    
+    @abstractmethod
+    def next(self, matrix_multiplication: bool = True) -> Self:
+        pass
 
-class WaveletImage:
+    @abstractmethod
+    def prev(self, matrix_multiplication: bool = True) -> Self:
+        pass
+
+    @abstractmethod
+    def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> Self:
+        pass
+
+class WaveletImage(AbstractWaveletImage):
     def __init__(self, image_array: npt.NDArray) -> None:
         self._image_array: npt.NDArray = WaveletImage.normalize_array_shape(
             image_array).copy()
@@ -86,12 +104,12 @@ class WaveletImage:
 
         for c in range(cols):
             col: npt.NDArray = temp[:, c]
-            half: int = rows // 2
-            sums: npt.NDArray = np.zeros(half, dtype=float)
-            diffs: npt.NDArray = np.zeros(half, dtype=float)
+            half = rows // 2
+            sums = np.zeros(half, dtype=float)
+            diffs = np.zeros(half, dtype=float)
             for i in range(half):
-                x: float = np.clip(col[2 * i], 0, 255)
-                y: float = np.clip(col[2 * i + 1], 0, 255)
+                x = np.clip(col[2 * i], 0, 255)
+                y = np.clip(col[2 * i + 1], 0, 255)
                 sums[i] = factor * (x + y)
                 diffs[i] = factor * (x - y)
             out[:half, c] = sums
@@ -133,15 +151,15 @@ class WaveletImage:
 
         for r in range(rows):
             row: npt.NDArray = temp[r, :]
-            half: int = cols // 2
-            sums: npt.NDArray = row[:half]
-            diffs: npt.NDArray = row[half:]
-            reconstructed: npt.NDArray = np.zeros(cols, dtype=float)
+            half = cols // 2
+            sums = row[:half]
+            diffs = row[half:]
+            reconstructed = np.zeros(cols, dtype=float)
             for i in range(half):
-                s: float = sums[i]
-                d: float = diffs[i]
-                x: float = factor * (s + d)
-                y: float = factor * (s - d)
+                s = sums[i]
+                d = diffs[i]
+                x = factor * (s + d)
+                y = factor * (s - d)
                 reconstructed[2 * i] = x
                 reconstructed[2 * i + 1] = y
             out[r, :] = reconstructed
@@ -216,4 +234,50 @@ class WaveletImage:
             else:
                 self.prev(matrix_multiplication=matrix_multiplication)
 
+        return self
+
+class RGBWaveletImage(AbstractWaveletImage):
+    def __init__(self, image_array: npt.NDArray):
+        channels: npt.NDArray = np.transpose(image_array, (2, 0, 1))
+        self._channels: list[WaveletImage] = [
+            WaveletImage(channels[i]) for i in range(channels.shape[0])
+        ]
+
+
+    @property
+    def channels(self) -> list[WaveletImage]:
+        return self._channels
+
+
+    @property
+    def image_array(self) -> npt.NDArray:
+        channel_arrays: list[npt.NDArray] = []
+        
+        for wavelet_channel in self._channels:
+            arr: npt.NDArray = np.asarray(
+                Image.fromarray(wavelet_channel._image_array).convert("L")
+            )
+            channel_arrays.append(arr)
+
+        return np.transpose(np.stack(channel_arrays, axis=0), (1, 2, 0))
+    
+    
+    def next(self, matrix_multiplication: bool = True) -> Self:
+        for channel in self._channels:
+            channel.next(matrix_multiplication=matrix_multiplication)
+        return self
+
+
+    def prev(self, matrix_multiplication: bool = True) -> Self:
+        for channel in self._channels:
+            channel.prev(matrix_multiplication=matrix_multiplication)
+        return self
+
+
+    def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> Self:
+        for channel in self._channels:
+            channel.go_to_iteration(
+                iteration=iteration,
+                matrix_multiplication=matrix_multiplication
+            )
         return self

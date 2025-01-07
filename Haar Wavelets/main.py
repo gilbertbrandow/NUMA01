@@ -1,6 +1,5 @@
-from wavelet_image import WaveletImage
+from wavelet_image import WaveletImage, RGBWaveletImage, AbstractWaveletImage
 from wavelet_image_io import WaveletImageIO
-from rgb_wavelet_image import RGBWaveletImage, AbstractWaveletImage
 import time
 import sys
 
