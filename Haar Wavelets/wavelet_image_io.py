@@ -17,10 +17,7 @@ class WaveletImageIO(object):
     
     @staticmethod
     def to_file(wavelet_image: AbstractWaveletImage, filepath: str) -> None:
-        img: Image.Image = Image.fromarray(wavelet_image.image_array)
-        
-        if isinstance(wavelet_image, WaveletImage):
-            img = img.convert("L")
+        img: Image.Image = Image.fromarray(wavelet_image.image_array).convert("L" if isinstance(wavelet_image, WaveletImage) else "RGB")
             
         img.save(filepath)
         print(f"Saved image to {filepath}")
