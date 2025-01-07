@@ -12,23 +12,31 @@ class WaveletTransformationError(Exception):
     pass
 
 class AbstractWaveletImage(ABC):
+    """
+    An abstract base class allowing us to use consistent type hints 
+    for both grayscale (WaveletImage) and RGB (RGBWaveletImage) 
+    instances in the WaveletImageIO class. 
+
+    :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
+    """
+
     @property
     def image_array(self) -> npt.NDArray:
         """
-        Gets the underlying NumPy array for this wavelet image
-               
-        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
-        :return: A representation of the image as a NumPy array
+        Returns a NumPy array representation of the image. This is an attempt at an abstract property.
+
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
+        :return: A representation of the image as a NumPy array.
         """
         return np.array([])
-    
 
     @abstractmethod
     def next(self, matrix_multiplication: bool = True) -> Self:
         """
-        Advances the wavelet transform to the next iteration level.
+        Performs one level of the Haar-wavelet transform 
+        on the image (or a subarray of it), depending on the current iteration.
 
-        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
         :param matrix_multiplication: Determines whether to use matrix-based or manual transform.
         :return: Self, for method chaining.
         """
@@ -37,9 +45,10 @@ class AbstractWaveletImage(ABC):
     @abstractmethod
     def prev(self, matrix_multiplication: bool = True) -> Self:
         """
-        Reverses the wavelet transform by one iteration level.
+        Reverses the Haar-wavelet transform by one iteration level, 
+        essentially undoing the last forward transform.
 
-        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
         :param matrix_multiplication: Determines whether to use matrix-based or manual inverse transform.
         :return: Self, for method chaining.
         """
@@ -48,11 +57,13 @@ class AbstractWaveletImage(ABC):
     @abstractmethod
     def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> Self:
         """
-        Moves the wavelet transform to a specific iteration level.
+        Moves directly to a specified iteration level, using the same 
+        logic as 'next' or 'prev' for forward and inverse transforms.
 
-        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
         :param iteration: The target iteration level to move to.
-        :param matrix_multiplication: Determines whether to use matrix-based or manual approach.
+        :param matrix_multiplication: Determines whether to use 
+                                      matrix-based or manual approach.
         :return: Self, for method chaining.
         """
         pass
