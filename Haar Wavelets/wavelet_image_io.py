@@ -1,5 +1,4 @@
 from PIL import Image
-import numpy.typing as npt
 import numpy as np
 from wavelet_image import AbstractWaveletImage, WaveletImage, RGBWaveletImage
 
@@ -10,6 +9,7 @@ class WaveletImageIO(object):
         Loads image from path & instantiates either RGBWaveletImage or WaveletImage 
         based on only_grayscale argument.
 
+        :author: Simon Gustafsson (simon@0100.se) 2024-07-01
         :param filepath: The path of the image to be loaded.
         :param only_grayscale: A flag for determining if preserving rgb values or not, 
         :return: an AbstractWaveletImage, either RGB or grayscale
@@ -23,6 +23,7 @@ class WaveletImageIO(object):
         """
         Saves image from AbstractWaveletImage instance to the provided filepath.
 
+        :author: Simon Gustafsson (simon@0100.se) 2024-07-01
         :param wavelet_image: The instance of wavelet image that should be saved.
         :param filepath: The destination to which save image
         :return: None
