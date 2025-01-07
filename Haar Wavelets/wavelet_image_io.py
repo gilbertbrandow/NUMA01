@@ -15,7 +15,7 @@ class WaveletImageIO(object):
         :return: an AbstractWaveletImage, either RGB or grayscale
         """
         image: Image.Image = Image.open(filepath).convert("L" if only_grayscale else "RGB")
-        return WaveletImage(np.asarray(image)) 
+        return WaveletImage(np.asarray(image)) if only_grayscale else RGBWaveletImage(np.asarray(image))
     
     
     @staticmethod
