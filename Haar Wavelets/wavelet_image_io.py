@@ -15,7 +15,7 @@ class WaveletImageIO(object):
     def to_file(wavelet_image: "RGBWaveletImage", filepath: str, only_compressed: bool = False) -> None:
         #TODO: Handle cases where only the subarray (upper left) image should be saved
         #wavelet_image._blue.next().prev()
-        img: Image.Image = Image.fromarray(wavelet_image.image_array())
+        img: Image.Image = Image.fromarray(wavelet_image.image_array)
 
         img.save(filepath)
         print(f"Saved image to {filepath}")

@@ -3,21 +3,18 @@ from wavelet_image_io import WaveletImageIO
 from rgb_wavelet_image import RGBWaveletImage
 import time
 
-INPUT_FILEPATH: str = "./Resources/article-image.gif"
-OUTPUT_FILEPATH: str = "./Resources/new-article-image.gif"
+INPUT_FILEPATH: str = "./Resources/colors.png"
+OUTPUT_FILEPATH: str = "./Resources/new-colors.png"
 
 def main() -> None:
     
     wi: RGBWaveletImage = WaveletImageIO.from_file(filepath=INPUT_FILEPATH)
-    #wi.go_to_iteration(2, matrix_multiplication=True)
     
     wi.next().prev().go_to_iteration(0)
-    
-    #wi.next(matrix_multiplication=True).prev(matrix_multiplication=True)
-    
+        
     WaveletImageIO.to_file(wavelet_image=wi, filepath=OUTPUT_FILEPATH)
     
-    print_time_difference(INPUT_FILEPATH, 4)
+    #print_time_difference(INPUT_FILEPATH, 4)
 
 
 def print_time_difference(filepath: str, number_of_iterations: int = 5, revert_back_to_original: bool = True) -> None:
