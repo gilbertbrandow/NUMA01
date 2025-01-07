@@ -5,23 +5,56 @@ from typing import Self
 from PIL import Image
 
 class WaveletTransformationError(Exception):
+    """
+    A custom exception to better udnerstand wavelet-transformation-related errors. 
+    This exception is raised when a wavelet transform operation encounters issues.
+    """
     pass
 
 class AbstractWaveletImage(ABC):
     @property
     def image_array(self) -> npt.NDArray:
-        return np.array([])
+        """
+        Gets the underlying NumPy array for this wavelet image
+               
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+        :return: The internal NumPy array (_image_array)
+        """
+        return self._image_array
     
+
     @abstractmethod
     def next(self, matrix_multiplication: bool = True) -> Self:
+        """
+        Advances the wavelet transform to the next iteration level.
+
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+        :param matrix_multiplication: Determines whether to use matrix-based or manual transform.
+        :return: Self, for method chaining.
+        """
         pass
 
     @abstractmethod
     def prev(self, matrix_multiplication: bool = True) -> Self:
+        """
+        Reverses the wavelet transform by one iteration level.
+
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+        :param matrix_multiplication: Determines whether to use matrix-based or manual inverse transform.
+        :return: Self, for method chaining.
+        """
         pass
 
     @abstractmethod
     def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> Self:
+        """
+        Moves the wavelet transform to a specific iteration level.
+
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+        :param iteration: The target iteration level to move to.
+        :param matrix_multiplication: Determines whether to use matrix-based or manual approach.
+        :return: Self, for method chaining.
+        """
         pass
 
 class WaveletImage(AbstractWaveletImage):
@@ -31,11 +64,6 @@ class WaveletImage(AbstractWaveletImage):
         self._image_array.setflags(write=True)
 
         self._iteration_count: int = 0
-
-
-    @property
-    def image_array(self) -> npt.NDArray:
-        return self._image_array
 
 
     @property
