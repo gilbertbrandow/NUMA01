@@ -69,21 +69,39 @@ class AbstractWaveletImage(ABC):
         pass
 
 class WaveletImage(AbstractWaveletImage):
+    """
+    A concrete implementation of a single-channel (grayscale) wavelet image.
+
+    :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+    """
+
     def __init__(self, image_array: npt.NDArray) -> None:
-        self._image_array: npt.NDArray = WaveletImage.normalize_array_shape(
-            image_array).copy()
+        """
+        Initializes the WaveletImage with a normalized, writable NumPy array.
+
+        :param image_array: The input array for the grayscale image.
+        """
+        self._image_array: npt.NDArray = WaveletImage.normalize_array_shape(image_array).copy()
         self._image_array.setflags(write=True)
-
         self._iteration_count: int = 0
-
 
     @property
     def iteration_count(self) -> int:
-        return self._iteration_count
+        """
+        Returns the current iteration level.
 
+        :return: The integer representing the current iteration count.
+        """
+        return self._iteration_count
 
     @staticmethod
     def normalize_array_shape(array: npt.NDArray) -> npt.NDArray:
+        """
+        Ensures both dimensions (height, width) are even by trimming a row or column if needed.
+
+        :param array: The NumPy array to normalize.
+        :return: A possibly trimmed version of the array with even dimensions.
+        """
         height, width = array.shape[:2]
         if height % 2 != 0:
             array = array[:-1, :]
@@ -91,37 +109,48 @@ class WaveletImage(AbstractWaveletImage):
             array = array[:, :-1]
         return array
 
-
     @staticmethod
     def compute_haar_wavelet_matrix(n: int, weight: float = np.sqrt(2)) -> npt.NDArray:
+        """
+        Computes an n x n Haar wavelet transform matrix.
+
+        :param n: The size of the matrix (must be even).
+        :param weight: The scale factor (defaults to sqrt(2)).
+        :return: The NumPy array representing the Haar matrix.
+        """
         if n < 2 or n % 2 != 0:
-            raise ValueError(
-                "n must be an even integer greater than or equal to 2."
-            )
+            raise ValueError("n must be an even integer >= 2.")
 
         HWT: npt.NDArray = np.zeros((n, n))
-
         for i in range(n // 2):
             HWT[i, 2 * i] = weight / 2.0
             HWT[i, 2 * i + 1] = weight / 2.0
-
         for i in range(n // 2):
             HWT[n // 2 + i, 2 * i] = -weight / 2.0
             HWT[n // 2 + i, 2 * i + 1] = weight / 2.0
-
         return HWT
-
 
     @staticmethod
     def apply_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
+        """
+        Applies a single-level forward Haar transform via matrix multiplication.
+
+        :param array: The 2D array to transform.
+        :return: The transformed array (LL, LH, HL, HH).
+        """
         rows, cols = array.shape[:2]
-        transformed_rows = WaveletImage.compute_haar_wavelet_matrix(
-            rows) @ array
+        transformed_rows = WaveletImage.compute_haar_wavelet_matrix(rows) @ array
         return transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T
-    
-    
+
     @staticmethod
     def apply_manual_wavelet_transform(array: npt.NDArray, weight: float = np.sqrt(2)) -> npt.NDArray:
+        """
+        Applies a single-level forward Haar transform by looping over rows & columns.
+
+        :param array: The 2D array to transform.
+        :param weight: The scale factor (defaults to sqrt(2)).
+        :return: The transformed array (LL, LH, HL, HH).
+        """
         rows: int = array.shape[0]
         cols: int = array.shape[1]
         temp: npt.NDArray = np.zeros((rows, cols), dtype=float)
@@ -156,17 +185,26 @@ class WaveletImage(AbstractWaveletImage):
 
         return out
 
-
     @staticmethod
     def apply_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
-        rows, cols = array.shape[:2]
-        reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(
-            rows).T @ array
-        return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
+        """
+        Applies a single-level inverse Haar transform via matrix multiplication.
 
+        :param array: The array containing LL, LH, HL, HH.
+        :return: The reconstructed 2D array.
+        """
+        rows, cols = array.shape[:2]
+        reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(rows).T @ array
+        return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
 
     @staticmethod
     def apply_manual_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
+        """
+        Applies a single-level inverse Haar transform by looping over rows & columns.
+
+        :param array: The array with LL, LH, HL, HH.
+        :return: The reconstructed 2D array.
+        """
         rows: int = array.shape[0]
         cols: int = array.shape[1]
         temp: npt.NDArray = np.zeros((rows, cols), dtype=float)
@@ -205,74 +243,93 @@ class WaveletImage(AbstractWaveletImage):
 
         return out
 
-
     def get_subarray_shape(self) -> tuple[int, int]:
+        """
+        Computes the subarray dimensions based on the current iteration level.
+
+        :return: A tuple (height, width) for the subarray.
+        """
         height, width = self._image_array.shape
+        factor: float = 2 ** -self._iteration_count
+        sub_h: int = int(height * factor)
+        sub_w: int = int(width * factor)
+        return (sub_h, sub_w)
 
-        factor: float = 2 ** -self.iteration_count
-        subarray_height: int = int(height * factor)
-        subarray_width: int = int(width * factor)
+    def set_L_L_quadrant(self, new_quadrant: npt.NDArray) -> Self:
+        """
+        Sets the top-left quadrant (LL) to the specified subarray.
 
-        return (subarray_height, subarray_width)
-
-
-    def set_L_L_quadrant(self, new_quadrant: npt.NDArray) -> "WaveletImage":
-        if self.iteration_count == 0:
+        :param new_quadrant: The subarray to store in the LL region.
+        :return: Self for method chaining.
+        """
+        if self._iteration_count == 0:
             self._image_array = new_quadrant
             return self
-
-        self._image_array[0:new_quadrant.shape[0],
-                          0:new_quadrant.shape[1]] = new_quadrant
+        self._image_array[: new_quadrant.shape[0], : new_quadrant.shape[1]] = new_quadrant
         return self
 
+    def next(self, matrix_multiplication: bool = True) -> Self:
+        """
+        Moves one level forward in the wavelet transform.
 
-    def next(self, matrix_multiplication: bool = True) -> "WaveletImage":
+        :param matrix_multiplication: Use matrix-based (True) or manual (False) transform.
+        :return: Self, for method chaining.
+        """
         height, width = self.get_subarray_shape()
-
         if height < 2 or width < 2:
             raise WaveletTransformationError(
-                f"Cannot perform transformation on subarray at iteration {self.iteration_count} "
+                f"Cannot perform transformation on subarray at iteration {self._iteration_count} "
                 f"because its dimensions are too small {(height, width)}."
             )
-
-        corner: npt.NDArray = self.normalize_array_shape(self._image_array.copy()[
-            :int(height), :int(width)])
-
-        corner = self.apply_wavelet_transform(corner) if matrix_multiplication else self.apply_manual_wavelet_transform(corner)
-        
+        corner: npt.NDArray = self.normalize_array_shape(
+            self._image_array.copy()[:height, :width]
+        )
+        corner = (
+            self.apply_wavelet_transform(corner)
+            if matrix_multiplication
+            else self.apply_manual_wavelet_transform(corner)
+        )
         self.set_L_L_quadrant(new_quadrant=corner)
-
         self._iteration_count += 1
         return self
 
+    def prev(self, matrix_multiplication: bool = True) -> Self:
+        """
+        Moves one level backward in the wavelet transform.
 
-    def prev(self, matrix_multiplication: bool = True) -> "WaveletImage":
+        :param matrix_multiplication: Use matrix-based (True) or manual (False) inverse transform.
+        :return: Self, for method chaining.
+        """
         if self._iteration_count == 0:
-            raise WaveletTransformationError(
-                "Cannot inverse transformation on original image")
+            raise WaveletTransformationError("Cannot inverse transform on original image.")
 
         self._iteration_count -= 1
-
         height, width = self.get_subarray_shape()
-        corner: npt.NDArray = self.normalize_array_shape(self._image_array.copy()[
-            :int(height), :int(width)])
-        
-        corner = self.apply_inverse_wavelet_transform(corner) if matrix_multiplication else self.apply_manual_inverse_wavelet_transform(corner)
-
+        corner: npt.NDArray = self.normalize_array_shape(
+            self._image_array.copy()[:height, :width]
+        )
+        corner = (
+            self.apply_inverse_wavelet_transform(corner)
+            if matrix_multiplication
+            else self.apply_manual_inverse_wavelet_transform(corner)
+        )
         return self.set_L_L_quadrant(new_quadrant=corner)
 
+    def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> Self:
+        """
+        Moves directly to a specific iteration level, using 'next' or 'prev' as needed.
 
-    def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> "WaveletImage":
+        :param iteration: The target iteration level.
+        :param matrix_multiplication: Determines whether to use matrix-based or manual approach.
+        :return: Self, for method chaining.
+        """
         if iteration < 0:
-            raise WaveletTransformationError(
-                "Can not inverse transformation beyond original image.")
-
-        while self.iteration_count != iteration:
-            if self.iteration_count < iteration:
+            raise WaveletTransformationError("Cannot go to negative iteration.")
+        while self._iteration_count != iteration:
+            if self._iteration_count < iteration:
                 self.next(matrix_multiplication=matrix_multiplication)
             else:
                 self.prev(matrix_multiplication=matrix_multiplication)
-
         return self
 
 class RGBWaveletImage(AbstractWaveletImage):
