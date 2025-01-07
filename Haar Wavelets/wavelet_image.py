@@ -72,7 +72,7 @@ class WaveletImage(AbstractWaveletImage):
     """
     A concrete implementation of a single-channel (grayscale) wavelet image.
 
-    :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
+    :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
     """
 
     def __init__(self, image_array: npt.NDArray) -> None:
@@ -259,7 +259,7 @@ class WaveletImage(AbstractWaveletImage):
         """
         Sets the top-left quadrant (LL) to the specified subarray.
 
-        :param new_quadrant: The subarray to store in the LL region.
+        :param new_quadrant: The subarray to replace the LL region.
         :return: Self for method chaining.
         """
         if self._iteration_count == 0:
