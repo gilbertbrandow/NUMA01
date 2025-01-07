@@ -6,7 +6,7 @@ from PIL import Image
 
 class WaveletTransformationError(Exception):
     """
-    A custom exception to better udnerstand wavelet-transformation-related errors. 
+    A custom exception to better understand wavelet-transformation-related errors. 
     This exception is raised when a wavelet transform operation encounters issues.
     """
     pass
@@ -18,9 +18,9 @@ class AbstractWaveletImage(ABC):
         Gets the underlying NumPy array for this wavelet image
                
         :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2024-07-01)
-        :return: The internal NumPy array (_image_array)
+        :return: A representation of the image as a NumPy array
         """
-        return self._image_array
+        return np.array([])
     
 
     @abstractmethod
