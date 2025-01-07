@@ -4,10 +4,13 @@ from abc import ABC, abstractmethod
 from typing import Self
 from PIL import Image
 
+
 class WaveletTransformationError(Exception):
     """
     A custom exception to better understand wavelet-transformation-related errors. 
     This exception is raised when a wavelet transform operation encounters issues.
+    
+    :author: Simon Gustafsson (2025-01-07)
     """
     pass
 
@@ -72,13 +75,13 @@ class WaveletImage(AbstractWaveletImage):
     """
     A concrete implementation of a single-channel (grayscale) wavelet image.
 
-    :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
     """
 
     def __init__(self, image_array: npt.NDArray) -> None:
         """
         Initializes the WaveletImage with a normalized, writable NumPy array.
 
+        :author: Isak Blom (2025-01-07)
         :param image_array: The input array for the grayscale image.
         """
         self._image_array: npt.NDArray = WaveletImage.normalize_array_shape(image_array).copy()
@@ -90,6 +93,7 @@ class WaveletImage(AbstractWaveletImage):
         """
         Returns the current iteration level.
 
+        :author: Isak Blom (2025-01-07)
         :return: The integer representing the current iteration count.
         """
         return self._iteration_count
@@ -99,6 +103,7 @@ class WaveletImage(AbstractWaveletImage):
         """
         Ensures both dimensions (height, width) are even by trimming a row or column if needed.
 
+        :author: Isak Blom (2025-01-07)
         :param array: The NumPy array to normalize.
         :return: A possibly trimmed version of the array with even dimensions.
         """
@@ -114,6 +119,7 @@ class WaveletImage(AbstractWaveletImage):
         """
         Computes an n x n Haar wavelet transform matrix.
 
+        :author: Isak Blom (2025-01-07)
         :param n: The size of the matrix (must be even).
         :param weight: The scale factor (defaults to sqrt(2)).
         :return: The NumPy array representing the Haar matrix.
@@ -130,11 +136,13 @@ class WaveletImage(AbstractWaveletImage):
             HWT[n // 2 + i, 2 * i + 1] = weight / 2.0
         return HWT
 
+
     @staticmethod
     def apply_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         """
         Applies a single-level forward Haar transform via matrix multiplication.
 
+        :author: Isak Blom (2025-01-07)
         :param array: The 2D array to transform.
         :return: The transformed array (LL, LH, HL, HH).
         """
@@ -142,11 +150,13 @@ class WaveletImage(AbstractWaveletImage):
         transformed_rows = WaveletImage.compute_haar_wavelet_matrix(rows) @ array
         return transformed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols).T
 
+
     @staticmethod
     def apply_manual_wavelet_transform(array: npt.NDArray, weight: float = np.sqrt(2)) -> npt.NDArray:
         """
         Applies a single-level forward Haar transform by looping over rows & columns.
 
+        :author: Simon Gustafsson (2025-01-07)
         :param array: The 2D array to transform.
         :param weight: The scale factor (defaults to sqrt(2)).
         :return: The transformed array (LL, LH, HL, HH).
@@ -163,8 +173,8 @@ class WaveletImage(AbstractWaveletImage):
             sums: npt.NDArray = np.zeros(half, dtype=float)
             diffs: npt.NDArray = np.zeros(half, dtype=float)
             for i in range(half):
-                x: float = np.clip(row[2 * i], 0, 255)
-                y: float = np.clip(row[2 * i + 1], 0, 255)
+                x: float = row[2 * i]
+                y: float = row[2 * i + 1]
                 sums[i] = factor * (x + y)
                 diffs[i] = factor * (x - y)
             temp[r, :half] = sums
@@ -176,8 +186,8 @@ class WaveletImage(AbstractWaveletImage):
             sums = np.zeros(half, dtype=float)
             diffs = np.zeros(half, dtype=float)
             for i in range(half):
-                x = np.clip(col[2 * i], 0, 255)
-                y = np.clip(col[2 * i + 1], 0, 255)
+                x = col[2 * i]
+                y = col[2 * i + 1]
                 sums[i] = factor * (x + y)
                 diffs[i] = factor * (x - y)
             out[:half, c] = sums
@@ -185,11 +195,13 @@ class WaveletImage(AbstractWaveletImage):
 
         return out
 
+
     @staticmethod
     def apply_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         """
         Applies a single-level inverse Haar transform via matrix multiplication.
 
+        :author: Isak Blom (2025-01-07)
         :param array: The array containing LL, LH, HL, HH.
         :return: The reconstructed 2D array.
         """
@@ -197,11 +209,13 @@ class WaveletImage(AbstractWaveletImage):
         reconstructed_rows = WaveletImage.compute_haar_wavelet_matrix(rows).T @ array
         return reconstructed_rows @ WaveletImage.compute_haar_wavelet_matrix(cols)
 
+
     @staticmethod
     def apply_manual_inverse_wavelet_transform(array: npt.NDArray) -> npt.NDArray:
         """
         Applies a single-level inverse Haar transform by looping over rows & columns.
 
+        :author: Simon Gustafsson (2025-01-07)
         :param array: The array with LL, LH, HL, HH.
         :return: The reconstructed 2D array.
         """
@@ -243,10 +257,12 @@ class WaveletImage(AbstractWaveletImage):
 
         return out
 
+
     def get_subarray_shape(self) -> tuple[int, int]:
         """
         Computes the subarray dimensions based on the current iteration level.
 
+        :author: Simon Gustafsson (2025-01-07)
         :return: A tuple (height, width) for the subarray.
         """
         height, width = self._image_array.shape
@@ -255,10 +271,12 @@ class WaveletImage(AbstractWaveletImage):
         sub_w: int = int(width * factor)
         return (sub_h, sub_w)
 
+
     def set_L_L_quadrant(self, new_quadrant: npt.NDArray) -> Self:
         """
         Sets the top-left quadrant (LL) to the specified subarray.
 
+        :author: Simon Gustafsson (2025-01-07)
         :param new_quadrant: The subarray to replace the LL region.
         :return: Self for method chaining.
         """
@@ -268,10 +286,12 @@ class WaveletImage(AbstractWaveletImage):
         self._image_array[: new_quadrant.shape[0], : new_quadrant.shape[1]] = new_quadrant
         return self
 
+
     def next(self, matrix_multiplication: bool = True) -> Self:
         """
         Moves one level forward in the wavelet transform.
 
+        :author: Egor Jakimov (2025-01-07)
         :param matrix_multiplication: Use matrix-based (True) or manual (False) transform.
         :return: Self, for method chaining.
         """
@@ -293,10 +313,12 @@ class WaveletImage(AbstractWaveletImage):
         self._iteration_count += 1
         return self
 
+
     def prev(self, matrix_multiplication: bool = True) -> Self:
         """
         Moves one level backward in the wavelet transform.
 
+        :author: Egor Jakimov (2025-01-07)
         :param matrix_multiplication: Use matrix-based (True) or manual (False) inverse transform.
         :return: Self, for method chaining.
         """
@@ -315,10 +337,12 @@ class WaveletImage(AbstractWaveletImage):
         )
         return self.set_L_L_quadrant(new_quadrant=corner)
 
+
     def go_to_iteration(self, iteration: int, matrix_multiplication: bool = True) -> Self:
         """
         Moves directly to a specific iteration level, using 'next' or 'prev' as needed.
 
+        :author: Simon Gustafsson (2025-01-07)
         :param iteration: The target iteration level.
         :param matrix_multiplication: Determines whether to use matrix-based or manual approach.
         :return: Self, for method chaining.
@@ -389,7 +413,8 @@ class RGBWaveletImage(AbstractWaveletImage):
         Perform a Haar wavelet transformation on each channel.
 
         :param matrix_multiplication: Whether to use matrix multiplication or not
-        :return: The image
+        :return: Self for method chaining.
+
         """
 
         for channel in self._channels:
@@ -402,7 +427,8 @@ class RGBWaveletImage(AbstractWaveletImage):
         Perform an Inverse Haar wavelet transformation on each channel.
 
         :param matrix_multiplication: Whether to use matrix multiplication or not
-        :return: The image
+        :return: Self for method chaining.
+
         """
 
         for channel in self._channels:
@@ -417,7 +443,7 @@ class RGBWaveletImage(AbstractWaveletImage):
 
         :param iteration: The target iteration level
         :param matrix_multiplication: Whether to use matrix multiplication or not
-        :return: The image
+        :return: Self for method chaining.
         """
 
         for channel in self._channels:
