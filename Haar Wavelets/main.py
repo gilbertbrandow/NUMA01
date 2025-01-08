@@ -4,7 +4,7 @@ import time
 import sys
 
 INPUT_FILEPATH: str = "./Resources/colors.png"
-OUTPUT_FILEPATH: str = "./Resources/new-colors.png"
+OUTPUT_FILEPATH: str = "./Resources/new-colors"
 
 
 def main() -> None:
@@ -27,9 +27,13 @@ def main() -> None:
     wi: AbstractWaveletImage = WaveletImageIO.from_file(
         filepath=INPUT_FILEPATH, only_grayscale=only_grayscale)
 
-    wi.next().prev().go_to_iteration(0)
+    wi.next().next().next().prev()
+    
+    WaveletImageIO.to_file(wavelet_image=wi, filepath=f"{OUTPUT_FILEPATH}-after-2-iterations.png")
 
-    WaveletImageIO.to_file(wavelet_image=wi, filepath=OUTPUT_FILEPATH)
+    wi.go_to_iteration(0)
+    
+    WaveletImageIO.to_file(wavelet_image=wi, filepath=f"{OUTPUT_FILEPATH}-as-normal.png")
 
     # print_time_difference(INPUT_FILEPATH, 4)
 
