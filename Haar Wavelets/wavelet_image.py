@@ -81,7 +81,7 @@ class WaveletImage(AbstractWaveletImage):
         """
         Initializes the WaveletImage with a normalized, writable NumPy array.
 
-        :author: Isak Blom (2025-01-07)
+        :author: Simon Gustafsson, Isak Blom (2025-01-07)
         :param image_array: The input array for the grayscale image.
         """
         self._image_array: npt.NDArray = WaveletImage.normalize_array_shape(image_array).copy()
