@@ -92,7 +92,7 @@ class WaveletImage(AbstractWaveletImage):
     @property
     def image_array(self) -> npt.NDArray:
         """
-        Returns a NumPy array representation of the image. This is an attempt at an abstract property.
+        Returns a NumPy array representation of the image.
 
         :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
         :return: A representation of the image as a NumPy array.
@@ -277,7 +277,7 @@ class WaveletImage(AbstractWaveletImage):
         :author: Simon Gustafsson (2025-01-07)
         :return: A tuple (height, width) for the subarray.
         """
-        height, width = self.image_array.shape
+        height, width = self._image_array.shape
         factor: float = 2 ** -self._iteration_count
         sub_h: int = int(height * factor)
         sub_w: int = int(width * factor)
