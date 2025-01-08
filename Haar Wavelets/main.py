@@ -26,11 +26,11 @@ def main() -> None:
 
     wi: AbstractWaveletImage = WaveletImageIO.from_file(
         filepath=INPUT_FILEPATH, only_grayscale=only_grayscale)
-
+    
     wi.next().next().next().prev()
     
     WaveletImageIO.to_file(wavelet_image=wi, filepath=f"{OUTPUT_FILEPATH}-after-2-iterations.png")
-
+    
     wi.go_to_iteration(0)
     
     WaveletImageIO.to_file(wavelet_image=wi, filepath=f"{OUTPUT_FILEPATH}-as-normal.png")

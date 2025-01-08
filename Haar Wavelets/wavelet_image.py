@@ -89,6 +89,17 @@ class WaveletImage(AbstractWaveletImage):
         self._iteration_count: int = 0
 
     @property
+    def image_array(self) -> npt.NDArray:
+        """
+        Returns a NumPy array representation of the image. This is an attempt at an abstract property.
+
+        :author: Isak Blom, Egor Jakimov, Simon Gustafsson (2025-01-07)
+        :return: A representation of the image as a NumPy array.
+        """
+        return self._image_array
+
+    
+    @property
     def iteration_count(self) -> int:
         """
         Returns the current iteration level.
