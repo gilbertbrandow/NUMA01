@@ -88,6 +88,7 @@ class WaveletImage(AbstractWaveletImage):
         self._image_array.setflags(write=True)
         self._iteration_count: int = 0
 
+
     @property
     def image_array(self) -> npt.NDArray:
         """
@@ -276,7 +277,7 @@ class WaveletImage(AbstractWaveletImage):
         :author: Simon Gustafsson (2025-01-07)
         :return: A tuple (height, width) for the subarray.
         """
-        height, width = self._image_array.shape
+        height, width = self.image_array.shape
         factor: float = 2 ** -self._iteration_count
         sub_h: int = int(height * factor)
         sub_w: int = int(width * factor)
@@ -412,7 +413,7 @@ class RGBWaveletImage(AbstractWaveletImage):
         
         for wavelet_channel in self._channels:
             arr: npt.NDArray = np.asarray(
-                Image.fromarray(wavelet_channel._image_array).convert("L")
+                Image.fromarray(wavelet_channel.image_array).convert("L")
             )
             channel_arrays.append(arr)
 
