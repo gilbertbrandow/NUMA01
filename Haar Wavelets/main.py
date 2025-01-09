@@ -3,8 +3,8 @@ from wavelet_image_io import WaveletImageIO
 import time
 import sys
 
-INPUT_FILEPATH: str = "./Resources/colors.png"
-OUTPUT_FILEPATH: str = "./Resources/new-colors"
+INPUT_FILEPATH: str = "./Resources/groupie.jpg"
+OUTPUT_FILEPATH: str = "./Resources/groupie"
 
 
 def main() -> None:
